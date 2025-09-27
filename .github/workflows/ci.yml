@@ -25,6 +25,9 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
+      - name: Restore (C#)
+        run: dotnet restore
+
       - name: Install dotnet-format
         run: dotnet tool install -g dotnet-format
 
@@ -34,14 +37,14 @@ jobs:
         shell: bash
         run: |
           set +e
-          dotnet format --verify-no-changes --exclude src/csharp/PumpController.UI
+          dotnet format --verify-no-changes --no-restore
           echo "exit_code=$?" >> $GITHUB_OUTPUT
           exit 0
 
       # If C# formatting needed, apply fixes
       - name: dotnet format (fix)
         if: steps.dotnet_check.outputs.exit_code != '0'
-        run: dotnet format --exclude src/csharp/PumpController.UI
+        run: dotnet format --no-restore
 
       # --- Python formatting ---
       - name: Setup Python
@@ -58,14 +61,14 @@ jobs:
         shell: bash
         run: |
           set +e
-          black --check . --exclude "src/csharp/PumpController.UI"
+          black --check .
           echo "exit_code=$?" >> $GITHUB_OUTPUT
           exit 0
 
       # If Python formatting needed, apply fixes
       - name: Black (fix)
         if: steps.black_check.outputs.exit_code != '0'
-        run: black . --exclude "src/csharp/PumpController.UI"
+        run: black .
 
       # If any fixes were applied, auto-commit them (only when we have write perms)
       - name: Auto-commit formatting changes
