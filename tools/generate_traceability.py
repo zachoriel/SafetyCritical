@@ -409,7 +409,9 @@ def build_coverage() -> Tuple[Dict[str, List[Tuple[str, str, str]]], Dict[str, s
 # ---- writers ----------------------------------------------------------------
 
 
-def write_traceability_matrix(coverage: Dict[str, List[Tuple[str, str, str]]], folder: Path, timestamp_disp: str) -> None:
+def write_traceability_matrix(
+    coverage: Dict[str, List[Tuple[str, str, str]]], folder: Path, timestamp_disp: str
+) -> None:
     lines: List[str] = []
     lines.append(f"# Traceability Matrix -- Generated: {timestamp_disp}")
     lines.append("")
@@ -430,7 +432,12 @@ def write_traceability_matrix(coverage: Dict[str, List[Tuple[str, str, str]]], f
     (folder / "traceability_matrix.log").write_text("\n".join(lines), encoding="utf-8")
 
 
-def write_validation_report(coverage: Dict[str, List[Tuple[str, str, str]]], overall: Dict[str, str], folder: Path, timestamp_disp: str) -> None:
+def write_validation_report(
+    coverage: Dict[str, List[Tuple[str, str, str]]],
+    overall: Dict[str, str],
+    folder: Path,
+    timestamp_disp: str,
+) -> None:
     all_reqs = sorted(overall.keys())
     total = len(all_reqs)
     covered = sum(1 for r in all_reqs if coverage.get(r))
@@ -502,6 +509,7 @@ def write_validation_report(coverage: Dict[str, List[Tuple[str, str, str]]], ove
 def _timestamp_for_folder() -> str:
     # Use a safe timestamp (no colons, slashes, etc.)
     return datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+
 
 def _timestamp_for_display() -> str:
     # Pretty for humans
