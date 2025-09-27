@@ -22,6 +22,7 @@ Project layout:
 from __future__ import annotations
 from pathlib import Path
 from collections import defaultdict, Counter
+from datetime import datetime
 import re
 import xml.etree.ElementTree as ET
 from typing import Dict, List, Tuple, Iterable
@@ -408,10 +409,12 @@ def build_coverage() -> Tuple[Dict[str, List[Tuple[str, str, str]]], Dict[str, s
 # ---- writers ----------------------------------------------------------------
 
 
-def write_traceability_matrix(coverage: Dict[str, List[Tuple[str, str, str]]]) -> None:
+def write_traceability_matrix(coverage: Dict[str, List[Tuple[str, str, str]]], folder: Path, timestamp_disp: str) -> None:
     lines: List[str] = []
-    lines.append("| Requirement | Lang | Test | Outcome |")
-    lines.append("|---|---|---|---|")
+    lines.append(f"# Traceability Matrix -- Generated: {timestamp_disp}")
+    lines.append("")
+    lines.append("| Requirement | Stack | Test | Outcome |")
+    lines.append("|---------|---------|---------|---------|")
     for rid in sorted(coverage.keys()):
         rows = coverage[rid]
         if not rows:
@@ -423,14 +426,11 @@ def write_traceability_matrix(coverage: Dict[str, List[Tuple[str, str, str]]]) -
     # Also add any REQs that never appeared (edge case)
     if not coverage:
         lines.append("| – | – | – | – |")
-    (ARTIFACTS / "traceability_matrix.md").write_text(
-        "\n".join(lines), encoding="utf-8"
-    )
+
+    (folder / "traceability_matrix.log").write_text("\n".join(lines), encoding="utf-8")
 
 
-def write_validation_report(
-    coverage: Dict[str, List[Tuple[str, str, str]]], overall: Dict[str, str]
-) -> None:
+def write_validation_report(coverage: Dict[str, List[Tuple[str, str, str]]], overall: Dict[str, str], folder: Path, timestamp_disp: str) -> None:
     all_reqs = sorted(overall.keys())
     total = len(all_reqs)
     covered = sum(1 for r in all_reqs if coverage.get(r))
@@ -442,8 +442,15 @@ def write_validation_report(
     cov_pct = (covered / total * 100.0) if total else 0.0
     pass_pct = (passed / total * 100.0) if total else 0.0
 
+    if failed > 0:
+        status_text = "Error: requirements failed."
+    elif cov_pct < 100.0:
+        status_text = "Warning: incomplete test coverage."
+    else:
+        status_text = "All requirements verified. System is validated."
+
     lines: List[str] = []
-    lines.append("# Validation Report")
+    lines.append(f"# Validation Report -- Generated: {timestamp_disp}")
     lines.append("")
     lines.append(f"- **Requirements**: {total}")
     lines.append(f"- **Covered**: {covered} ({cov_pct:.0f}%)")
@@ -452,6 +459,7 @@ def write_validation_report(
     lines.append(f"- **Skipped**: {skipped}")
     lines.append(f"- **Unknown**: {unknown}")
     lines.append("")
+
     if failed:
         lines.append("## Failing Requirements")
         for r in all_reqs:
@@ -461,6 +469,7 @@ def write_validation_report(
                 )
                 lines.append(f"- {r}: {tests}")
         lines.append("")
+
     if any(not coverage.get(r) for r in all_reqs):
         lines.append("## Uncovered Requirements")
         for r in all_reqs:
@@ -471,7 +480,7 @@ def write_validation_report(
     # Per-REQ rollup
     lines.append("## Per-Requirement Status")
     lines.append("| Requirement | Overall | Tests |")
-    lines.append("|---|---|---|")
+    lines.append("|----------|----------|----------|")
     for r in all_reqs:
         tests = coverage.get(r, [])
         test_summ = (
@@ -481,7 +490,22 @@ def write_validation_report(
         )
         lines.append(f"| {r} | {overall.get(r, 'Unknown')} | {test_summ} |")
 
-    (ARTIFACTS / "validation_report.md").write_text("\n".join(lines), encoding="utf-8")
+    lines.append("")
+    lines.append(f"**Status**: {status_text}")
+
+    (folder / "validation_report.log").write_text("\n".join(lines), encoding="utf-8")
+
+
+# ---- helpers ----------------------------------------------------------------
+
+
+def _timestamp_for_folder() -> str:
+    # Use a safe timestamp (no colons, slashes, etc.)
+    return datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+
+def _timestamp_for_display() -> str:
+    # Pretty for humans
+    return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 
 # ---- main -------------------------------------------------------------------
@@ -489,6 +513,11 @@ def write_validation_report(
 
 def main():
     coverage, overall = build_coverage()
+
+    folder_stamp = _timestamp_for_folder()
+    timestamp_disp = _timestamp_for_display()
+    folder = ARTIFACTS / folder_stamp
+    folder.mkdir(parents=True, exist_ok=True)
 
     # If no REQs discovered at all, try to salvage by scanning text for “REQ-xxx”
     if not overall:
@@ -516,8 +545,8 @@ def main():
     print("[debug] cs_map keys:", list(cs_map_dbg.keys())[:5])
     print("[debug] py_map keys:", list(py_map_dbg.keys())[:5])
 
-    write_traceability_matrix(coverage)
-    write_validation_report(coverage, overall)
+    write_traceability_matrix(coverage, folder, timestamp_disp)
+    write_validation_report(coverage, overall, folder, timestamp_disp)
 
     # Friendly CLI print
     total = len(overall)
