@@ -28,7 +28,3 @@ def test_authorized_shutdown():
         and result["Emergency"] is True
         and result["Reason"] == "OperatorShutdown"
     )
-
-
-# Run Python tests locally
-# py pytest -q --junitxml=tests/python/junit_results.xml

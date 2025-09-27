@@ -116,7 +116,3 @@ public class ControllerSpec
         return new OperatorCommand(userId, action, hex);
     }
 }
-
-// Run C# tests locally:
-// dotnet test tests/csharp/PumpController.Tests --logger "trx;LogFileName=results.trx"
-// TRX output will be in TestResults/ under the test project directory.

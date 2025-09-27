@@ -14,6 +14,3 @@ public class InputDto
     public double pressureBar { get; set; }
     public OperatorCommand? command { get; set; }
 }
-
-// CLI usage example:
-// printf '{"temperatureC":290,"pressureBar":80,"command":null}' | dotnet run --project src/csharp/PumpController.CLI
