@@ -109,7 +109,8 @@ jobs:
         run: |
           dotnet test tests/csharp/PumpController.Tests \
             --configuration Release \
-            --logger "trx;LogFileName=dotnet_tests.trx"
+            --logger "trx;LogFileName=dotnet_tests.trx" \
+            --results-directory TestResults
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -135,12 +136,18 @@ jobs:
           ls -l "$GITHUB_WORKSPACE/tests/python/junit_results.xml" || true
 
       - name: Generate traceability matrix & validation report
+        env:
+          TRX_SEARCH_ROOT: ${{ github.workspace }}/TestResults
+          JUNIT_XML: ${{ github.workspace }}/pytest_results.xml
         run: python ./tools/generate_traceability.py
 
       - name: Upload artifacts (reports & logs)
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: safetycritical-artifacts
-          path: artifacts/**
+          name: reports-and-logs
+          path: |
+            artifacts/
+            TestResults/*.trx
+            pytest_results.xml
           if-no-files-found: warn
