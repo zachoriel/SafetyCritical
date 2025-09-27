@@ -1,6 +1,7 @@
 # tools/parse_trx.py
 import xml.etree.ElementTree as ET
 
+
 def parse_trx(trx_path: str):
     root = ET.parse(trx_path).getroot()
     NS = {"t": "http://microsoft.com/schemas/VisualStudio/TeamTest/2010"}
@@ -11,7 +12,7 @@ def parse_trx(trx_path: str):
         cats = []
         # Look for category items anywhere under this UnitTest, namespace-agnostic
         for node in ut.iter():
-            tag = node.tag.split('}')[-1]  # strip any ns
+            tag = node.tag.split("}")[-1]  # strip any ns
             if tag in ("TestCategoryItem", "TestCategory"):
                 val = (
                     node.attrib.get("TestCategory")
@@ -27,9 +28,17 @@ def parse_trx(trx_path: str):
         test_id = r.get("testId")
         name = r.get("testName")
         outcome = r.get("outcome")
-        results.append({"name": name, "outcome": outcome, "categories": id_to_cats.get(test_id, [])})
+        results.append(
+            {
+                "name": name,
+                "outcome": outcome,
+                "categories": id_to_cats.get(test_id, []),
+            }
+        )
     return results
+
 
 if __name__ == "__main__":
     import sys, json
+
     print(json.dumps(parse_trx(sys.argv[1]), indent=2))

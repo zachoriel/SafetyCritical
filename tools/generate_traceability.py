@@ -46,8 +46,10 @@ REQ_RE = re.compile(r"\bREQ-(\d{3})\b", re.IGNORECASE)
 
 # ---- Small helpers ----------------------------------------------------------
 
+
 def read_text(p: Path) -> str:
     return p.read_text(encoding="utf-8", errors="ignore")
+
 
 def uniq(seq: Iterable[str]) -> List[str]:
     seen = set()
@@ -58,15 +60,23 @@ def uniq(seq: Iterable[str]) -> List[str]:
             out.append(x)
     return out
 
+
 def outcome_rank(outcome: str) -> int:
     # Lower is better; used to compute overall per-REQ status
-    order = {"Passed": 0, "Success": 0, "OK": 0,
-             "Skipped": 1,
-             "Unknown": 2,
-             "Failed": 3, "Error": 3}
+    order = {
+        "Passed": 0,
+        "Success": 0,
+        "OK": 0,
+        "Skipped": 1,
+        "Unknown": 2,
+        "Failed": 3,
+        "Error": 3,
+    }
     return order.get(outcome, 2)
 
+
 # ---- discover results: TRX (C#) --------------------------------------------
+
 
 def parse_trx_file(path: Path) -> List[Dict[str, str]]:
     """
@@ -86,7 +96,9 @@ def parse_trx_file(path: Path) -> List[Dict[str, str]]:
         outcome = res.attrib.get("outcome", "") or res.attrib.get("result", "")
         if not name:
             # Fallback: use executionId or id if present
-            name = res.attrib.get("executionId") or res.attrib.get("testId") or "Unknown"
+            name = (
+                res.attrib.get("executionId") or res.attrib.get("testId") or "Unknown"
+            )
         if not outcome:
             # Guess from child nodes
             if res.find(".//{*}Output/{*}ErrorInfo/{*}Message") is not None:
@@ -95,6 +107,7 @@ def parse_trx_file(path: Path) -> List[Dict[str, str]]:
                 outcome = "Unknown"
         rows.append({"name": name.strip(), "outcome": outcome.strip()})
     return rows
+
 
 def load_all_trx_rows() -> List[Dict[str, str]]:
     files: List[Path] = []
@@ -105,7 +118,9 @@ def load_all_trx_rows() -> List[Dict[str, str]]:
         rows.extend(parse_trx_file(f))
     return rows
 
+
 # ---- discover results: JUnit (pytest) --------------------------------------
+
 
 def parse_junit_file(path: Path) -> List[Dict[str, str]]:
     """
@@ -131,6 +146,7 @@ def parse_junit_file(path: Path) -> List[Dict[str, str]]:
         rows.append({"name": norm.strip(), "outcome": outcome})
     return rows
 
+
 def load_all_junit_rows() -> List[Dict[str, str]]:
     files: List[Path] = []
     for pat in JUNIT_GLOB:
@@ -140,7 +156,9 @@ def load_all_junit_rows() -> List[Dict[str, str]]:
         rows.extend(parse_junit_file(f))
     return rows
 
+
 # ---- discover REQs from source: C# -----------------------------------------
+
 
 def map_cs_test_reqs() -> Dict[str, List[str]]:
     """
@@ -158,16 +176,18 @@ def map_cs_test_reqs() -> Dict[str, List[str]]:
     cat_rgx = re.compile(r'Category\s*\(\s*"?\b(REQ-\d{3})\b"?\s*\)', re.I)
     # Matches a method with any attribute block above it; allows async/Task/void signatures
     method_rgx = re.compile(
-        r'(?P<attrs>(?:\s*\[[^\]]+\]\s*)*)\s*'
-        r'(?:public|private|internal|protected)\s+(?:async\s+)?(?:void|Task(?:<[^>]+>)?)\s+'
-        r'(?P<name>[A-Za-z0-9_]+)\s*\(',
-        re.S
+        r"(?P<attrs>(?:\s*\[[^\]]+\]\s*)*)\s*"
+        r"(?:public|private|internal|protected)\s+(?:async\s+)?(?:void|Task(?:<[^>]+>)?)\s+"
+        r"(?P<name>[A-Za-z0-9_]+)\s*\(",
+        re.S,
     )
     # Consider these as "test" attributes
-    test_attr_hint = re.compile(r'\[\s*(Test|TestMethod|Theory|TestCase|TestCaseSource|TestOf)\b', re.I)
+    test_attr_hint = re.compile(
+        r"\[\s*(Test|TestMethod|Theory|TestCase|TestCaseSource|TestOf)\b", re.I
+    )
     class_rgx = re.compile(
-        r'(?P<classattrs>(?:\s*\[[^\]]+\]\s*)*)\s*(?:public|internal)\s+class\s+(?P<classname>[A-Za-z0-9_]+)\b(.*?)\{(?P<body>.*)\}',
-        re.S
+        r"(?P<classattrs>(?:\s*\[[^\]]+\]\s*)*)\s*(?:public|internal)\s+class\s+(?P<classname>[A-Za-z0-9_]+)\b(.*?)\{(?P<body>.*)\}",
+        re.S,
     )
 
     for f in files:
@@ -211,7 +231,9 @@ def map_cs_test_reqs() -> Dict[str, List[str]]:
         mapping[k] = sorted(set(v))
     return mapping
 
+
 # ---- discover REQs from source: Python -------------------------------------
+
 
 def map_py_test_reqs() -> Dict[str, List[str]]:
     """
@@ -230,10 +252,11 @@ def map_py_test_reqs() -> Dict[str, List[str]]:
         r"@?[^\n]*\ndef\s+(test_[A-Za-z0-9_]+)\s*\("  # decorator lines allowed
     )
     deco_block_rgx = re.compile(
-        r"(?:^\s*@.*\n)+\s*def\s+(test_[A-Za-z0-9_]+)\s*\(",
-        re.M
+        r"(?:^\s*@.*\n)+\s*def\s+(test_[A-Za-z0-9_]+)\s*\(", re.M
     )
-    req_in_deco_rgx = re.compile(r'@pytest\.mark\.[A-Za-z_]+\s*\(\s*["\']\b(REQ-\d{3})\b["\']', re.I)
+    req_in_deco_rgx = re.compile(
+        r'@pytest\.mark\.[A-Za-z_]+\s*\(\s*["\']\b(REQ-\d{3})\b["\']', re.I
+    )
     triple_rgx = re.compile(r'^\s*[ru]?"""(.*?)"""', re.S | re.M)
 
     for f in files:
@@ -247,7 +270,7 @@ def map_py_test_reqs() -> Dict[str, List[str]]:
             name = m.group(1)
             # Grab preceding lines (up to 5) to catch the actual markers
             start = m.start()
-            prefix = text[max(0, start - 500):start]
+            prefix = text[max(0, start - 500) : start]
             reqs = [r.upper() for r in req_in_deco_rgx.findall(prefix)]
             if reqs:
                 mapping.setdefault(name, []).extend(uniq(reqs))
@@ -258,10 +281,16 @@ def map_py_test_reqs() -> Dict[str, List[str]]:
             # If name contains REQ-xxx (rare), add
             name_reqs = [f"REQ-{num:0>3}" for num in map(int, REQ_RE.findall(name))]
             if name_reqs:
-                mapping.setdefault(name, []).extend(uniq([r.upper() for r in name_reqs]))
+                mapping.setdefault(name, []).extend(
+                    uniq([r.upper() for r in name_reqs])
+                )
 
         # Docstrings right after def
-        for m in re.finditer(r"def\s+(test_[A-Za-z0-9_]+)\s*\([^)]*\)\s*:\s*(?:\n\s*)+([rRuU]?\"\"\".*?\"\"\")", text, re.S):
+        for m in re.finditer(
+            r"def\s+(test_[A-Za-z0-9_]+)\s*\([^)]*\)\s*:\s*(?:\n\s*)+([rRuU]?\"\"\".*?\"\"\")",
+            text,
+            re.S,
+        ):
             name = m.group(1)
             doc = m.group(2)
             reqs = [f"REQ-{n:0>3}" for n in map(int, REQ_RE.findall(doc))]
@@ -284,6 +313,7 @@ def map_py_test_reqs() -> Dict[str, List[str]]:
         mapping[k] = uniq([x.upper() for x in v])
     return mapping
 
+
 def outcome_for_csharp_method(method_name: str, csharp_out: Dict[str, str]) -> str:
     """
     Find TRX outcome for a C# method name, tolerating fully-qualified names.
@@ -294,14 +324,22 @@ def outcome_for_csharp_method(method_name: str, csharp_out: Dict[str, str]) -> s
     # Common TRX shapes: Namespace.Class.Method, Namespace.Class.Method(param...), Class.Method
     # Try dot / double-colon / suffix forms
     for k, v in csharp_out.items():
-        if k.endswith(f".{method_name}") or k.endswith(f"::{method_name}") or k == method_name:
+        if (
+            k.endswith(f".{method_name}")
+            or k.endswith(f"::{method_name}")
+            or k == method_name
+        ):
             return v
         # Also tolerate parameterized names like Method(...)
-        if k.endswith(f".{method_name}") or re.search(rf"(^|[.:]){re.escape(method_name)}\s*\(", k):
+        if k.endswith(f".{method_name}") or re.search(
+            rf"(^|[.:]){re.escape(method_name)}\s*\(", k
+        ):
             return v
     return "Unknown"
 
+
 # ---- build coverage ---------------------------------------------------------
+
 
 def build_coverage() -> Tuple[Dict[str, List[Tuple[str, str, str]]], Dict[str, str]]:
     """
@@ -318,8 +356,8 @@ def build_coverage() -> Tuple[Dict[str, List[Tuple[str, str, str]]], Dict[str, s
     py_out = {r["name"]: r["outcome"] for r in junit_rows}
 
     # Source mappings
-    cs_map = map_cs_test_reqs()   # C# method -> [REQs]
-    py_map = map_py_test_reqs()   # py func  -> [REQs]
+    cs_map = map_cs_test_reqs()  # C# method -> [REQs]
+    py_map = map_py_test_reqs()  # py func  -> [REQs]
 
     # Collect all REQs seen
     reqs = set()
@@ -357,7 +395,9 @@ def build_coverage() -> Tuple[Dict[str, List[Tuple[str, str, str]]], Dict[str, s
 
     return coverage, overall
 
+
 # ---- writers ----------------------------------------------------------------
+
 
 def write_traceability_matrix(coverage: Dict[str, List[Tuple[str, str, str]]]) -> None:
     lines: List[str] = []
@@ -369,15 +409,19 @@ def write_traceability_matrix(coverage: Dict[str, List[Tuple[str, str, str]]]) -
             lines.append(f"| {rid} | – | – | – |")
             continue
         # one row per test
-        for (lang, test, outcome) in rows:
+        for lang, test, outcome in rows:
             lines.append(f"| {rid} | {lang} | {test} | {outcome} |")
     # Also add any REQs that never appeared (edge case)
     if not coverage:
         lines.append("| – | – | – | – |")
-    (ARTIFACTS / "traceability_matrix.md").write_text("\n".join(lines), encoding="utf-8")
+    (ARTIFACTS / "traceability_matrix.md").write_text(
+        "\n".join(lines), encoding="utf-8"
+    )
 
-def write_validation_report(coverage: Dict[str, List[Tuple[str, str, str]]],
-                            overall: Dict[str, str]) -> None:
+
+def write_validation_report(
+    coverage: Dict[str, List[Tuple[str, str, str]]], overall: Dict[str, str]
+) -> None:
     all_reqs = sorted(overall.keys())
     total = len(all_reqs)
     covered = sum(1 for r in all_reqs if coverage.get(r))
@@ -403,7 +447,9 @@ def write_validation_report(coverage: Dict[str, List[Tuple[str, str, str]]],
         lines.append("## Failing Requirements")
         for r in all_reqs:
             if overall.get(r) == "Failed":
-                tests = "; ".join(f"{lang}:{name}({out})" for lang, name, out in coverage[r])
+                tests = "; ".join(
+                    f"{lang}:{name}({out})" for lang, name, out in coverage[r]
+                )
                 lines.append(f"- {r}: {tests}")
         lines.append("")
     if any(not coverage.get(r) for r in all_reqs):
@@ -419,12 +465,18 @@ def write_validation_report(coverage: Dict[str, List[Tuple[str, str, str]]],
     lines.append("|---|---|---|")
     for r in all_reqs:
         tests = coverage.get(r, [])
-        test_summ = "<none>" if not tests else "<br/>".join(f"{lang}:{name} — {out}" for lang, name, out in tests)
+        test_summ = (
+            "<none>"
+            if not tests
+            else "<br/>".join(f"{lang}:{name} — {out}" for lang, name, out in tests)
+        )
         lines.append(f"| {r} | {overall.get(r, 'Unknown')} | {test_summ} |")
 
     (ARTIFACTS / "validation_report.md").write_text("\n".join(lines), encoding="utf-8")
 
+
 # ---- main -------------------------------------------------------------------
+
 
 def main():
     coverage, overall = build_coverage()
@@ -433,7 +485,14 @@ def main():
     if not overall:
         all_req_ids = set()
         for p in ROOT.rglob("*.*"):
-            if p.is_file() and p.suffix.lower() in {".cs", ".py", ".md", ".yml", ".yaml", ".txt"}:
+            if p.is_file() and p.suffix.lower() in {
+                ".cs",
+                ".py",
+                ".md",
+                ".yml",
+                ".yaml",
+                ".txt",
+            }:
                 for n in REQ_RE.findall(read_text(p)):
                     all_req_ids.add(f"REQ-{int(n):0>3}")
         # Seed empty coverage/overall
@@ -443,7 +502,8 @@ def main():
 
     print("[debug] junit_rows:", len(load_all_junit_rows()))
     print("[debug] trx_rows:", len(load_all_trx_rows()))
-    cs_map_dbg = map_cs_test_reqs(); py_map_dbg = map_py_test_reqs()
+    cs_map_dbg = map_cs_test_reqs()
+    py_map_dbg = map_py_test_reqs()
     print("[debug] cs_map keys:", list(cs_map_dbg.keys())[:5])
     print("[debug] py_map keys:", list(py_map_dbg.keys())[:5])
 
@@ -453,8 +513,11 @@ def main():
     # Friendly CLI print
     total = len(overall)
     covered = sum(1 for r in overall if coverage.get(r))
-    print(f"[generate_traceability] Requirements: {total}, Covered: {covered} ({(covered/total*100 if total else 0):.0f}%)")
+    print(
+        f"[generate_traceability] Requirements: {total}, Covered: {covered} ({(covered/total*100 if total else 0):.0f}%)"
+    )
     print(f"Artifacts written to: {ARTIFACTS}")
+
 
 if __name__ == "__main__":
     main()
