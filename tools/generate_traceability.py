@@ -36,11 +36,10 @@ CS_TEST_GLOB = [
     "tests/csharp/**/*.cs",
     "tests/csharp/*.cs",
     "tests/**/*.cs",
-    "**/test_*.cs"
+    "**/test_*.cs",
 ]
 PY_TEST_GLOB = [
-    "tests/python/*.py"
-    "tests/python/**/*.py",
+    "tests/python/*.py" "tests/python/**/*.py",
     "tests/**/*.py",
     "**/test_*.py",
 ]

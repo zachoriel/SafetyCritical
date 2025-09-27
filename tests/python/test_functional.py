@@ -2,6 +2,7 @@ import json, subprocess, sys, pathlib, pytest
 
 CLI = ["dotnet", "run", "--project", "src/csharp/PumpController.CLI"]
 
+
 def invoke(temperatureC, pressureBar, command=None):
     payload = {
         "temperatureC": temperatureC,
@@ -13,6 +14,7 @@ def invoke(temperatureC, pressureBar, command=None):
     )
     return json.loads(process.stdout.decode())
 
+
 @pytest.mark.req("REQ-005")
 def test_normal_operation():
     result = invoke(250, 90, None)
@@ -21,6 +23,7 @@ def test_normal_operation():
         and result["Emergency"] is False
         and result["Reason"] == "Normal"
     )
+
 
 @pytest.mark.req("REQ-006")
 def test_emergency_flag_consistency():

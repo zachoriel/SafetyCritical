@@ -1,9 +1,11 @@
 from test_functional import invoke
 import pytest
 
+
 def checksum(user, action):
     s = sum((ord(c) for c in f"{user}|{action}")) & 0xFF
     return f"{s:02X}"
+
 
 @pytest.mark.req("REQ-007")
 def test_invalid_command_rejected():
@@ -14,6 +16,7 @@ def test_invalid_command_rejected():
         and result["Emergency"] is False
         and result["Reason"] == "Normal"
     )
+
 
 @pytest.mark.req("REQ-004")
 @pytest.mark.req("REQ-006")
