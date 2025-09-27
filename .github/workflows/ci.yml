@@ -34,14 +34,14 @@ jobs:
         shell: bash
         run: |
           set +e
-          dotnet format --verify-no-changes
+          dotnet format --verify-no-changes --exclude src/csharp/PumpController.UI
           echo "exit_code=$?" >> $GITHUB_OUTPUT
           exit 0
 
       # If C# formatting needed, apply fixes
       - name: dotnet format (fix)
         if: steps.dotnet_check.outputs.exit_code != '0'
-        run: dotnet format
+        run: dotnet format --exclude src/csharp/PumpController.UI
 
       # --- Python formatting ---
       - name: Setup Python
@@ -58,14 +58,14 @@ jobs:
         shell: bash
         run: |
           set +e
-          black --check .
+          black --check . --exclude "src/csharp/PumpController.UI"
           echo "exit_code=$?" >> $GITHUB_OUTPUT
           exit 0
 
       # If Python formatting needed, apply fixes
       - name: Black (fix)
         if: steps.black_check.outputs.exit_code != '0'
-        run: black .
+        run: black . --exclude "src/csharp/PumpController.UI"
 
       # If any fixes were applied, auto-commit them (only when we have write perms)
       - name: Auto-commit formatting changes
