@@ -1,3 +1,7 @@
+using System;
+using System.Reflection;
+using System.Linq;
+using System.Runtime.CompilerServices;
 using NUnit.Framework;
 using PumpControllerLib;
 
@@ -71,6 +75,38 @@ public class ControllerSpec
         Assert.That(r.PumpOn, Is.True);
         Assert.That(r.Emergency, Is.False);
         Assert.That(r.Reason, Is.EqualTo("Normal"));
+    }
+
+    [Test, Category("REQ-008")]
+    public void ConfigProperties_AreInitOnly()
+    {
+        var props = typeof(PumpConfig).GetProperties();
+        foreach (var p in props)
+        {
+            // PumpConfig properties must have an init-only setter
+            Assert.That(p.SetMethod, Is.Not.Null, $"{p.Name} should have a setter (init)");
+            var mods = p.SetMethod!.ReturnParameter.GetRequiredCustomModifiers();
+            Assert.That(mods, Does.Contain(typeof(IsExternalInit)), $"{p.Name} setter should be init-only");
+        }
+    }
+
+    [Test, Category("REQ-009")]
+    public void TsatLookupAccuracy_Within2C()
+    {
+        // Reflect to call internal TsatTable.LookupTsatC(double)
+        var asm = typeof(PumpController).Assembly;
+        var t = asm.GetType("PumpControllerLib.TsatTable", throwOnError: true)!;
+        var inst = Activator.CreateInstance(t, nonPublic: true)!;
+        var m = t.GetMethod("LookupTsatC", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)!;
+
+        // Sample a few pressures; (bar -> degrees Celsius): 10 -> 180, 70 -> 285, 100 -> 311
+        double tsat10 = (double)m.Invoke(inst, new object[] { 10.0 })!;
+        double tsat70 = (double)m.Invoke(inst, new object[] { 70.0 })!;
+        double tsat100 = (double)m.Invoke(inst, new object[] { 100.0 })!;
+
+        Assert.That(tsat10, Is.InRange(178, 182));
+        Assert.That(tsat70, Is.InRange(283, 287));
+        Assert.That(tsat100, Is.InRange(309, 313));
     }
 
     private static OperatorCommand MakeCmd(string userId, string action)
