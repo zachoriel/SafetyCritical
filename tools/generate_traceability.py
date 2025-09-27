@@ -18,8 +18,9 @@ def read_text_any(p: Path) -> str:
     # last resort: replace undecodable characters
     return p.read_bytes().decode("utf-8", errors="replace")
 
-req_text = read_text_any(ROOT/"requirements/requirements.yaml")
-REQS = yaml.safe_load(req_text)['requirements']
+
+req_text = read_text_any(ROOT / "requirements/requirements.yaml")
+REQS = yaml.safe_load(req_text)["requirements"]
 req_ids = [r["id"] for r in REQS]
 
 
