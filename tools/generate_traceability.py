@@ -6,9 +6,20 @@ ROOT = Path(__file__).resolve().parents[1]
 TRX_DIR = ROOT / "tests/csharp/PumpController.Tests/TestResults"
 PY_JUNIT = ROOT / "tests/python/junit_results.xml"
 
-REQS = yaml.safe_load((ROOT / "requirements/requirements.yaml").read_text())[
-    "requirements"
-]
+# --- robust file read to tolerate encodings on Windows/macOS/Linux ---
+
+
+def read_text_any(p: Path) -> str:
+    for enc in ("utf-8", "utf-8-sig", "cp1252"):
+        try:
+            return p.read_text(encoding=enc)
+        except UnicodeDecodeError:
+            continue
+    # last resort: replace undecodable characters
+    return p.read_bytes().decode("utf-8", errors="replace")
+
+req_text = read_text_any(ROOT/"requirements/requirements.yaml")
+REQS = yaml.safe_load(req_text)['requirements']
 req_ids = [r["id"] for r in REQS]
 
 
