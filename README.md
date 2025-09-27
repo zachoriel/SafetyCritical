@@ -1,6 +1,22 @@
 # Safety-Critical QA Demonstration Project
 
-## I. Overview  
+## Table of Contents
+- [I. Overview](#i-overview)
+- [II. Explanation of Terminology](#ii-explanation-of-terminology)
+- [III. System Overview](#iii-system-overview)
+- [IV. Requirements Specification](#iv-requirements-specification)
+- [V. Technical Architecture](#v-technical-architecture)
+- [VI. Repository Layout](#vi-repository-layout)
+- [VII. Implementation Steps](#vii-implementation-steps)
+- [VIII. Example Outputs](#viii-example-outputs)
+- [IX. Extensions & Future Work](#ix-extensions--future-work)
+- [X. Quickstart](#x-quickstart)
+
+---
+
+## I. Overview
+<details>
+<summary>Click to expand</summary>
 
 This project demonstrates how safety-critical software can be tested and verified in ways inspired by highly-regulated industries such as nuclear power, aerospace, and medicine.  
 
@@ -12,11 +28,15 @@ At its core, the system simulates a reactor coolant pump controller – software
 - Producing traceability and compliance reports using Python, showing which requirements were tested and whether they passed.  
 - Adding a basic cybersecurity check to ensure malformed or unauthorized operator commands are rejected safely.  
 
-The goal is to showcase systematic testing, automation, and compliance mindset to safety-critical domains.  
+The goal is to showcase systematic testing, automation, and compliance mindset to safety-critical domains.
+
+</details>
 
 ---
 
-## II. Explanation of Terminology  
+## II. Explanation of Terminology
+<details>
+<summary>Click to expand</summary>
 
 - **Safety-critical system:** Software where failure could cause injury, death, or major financial or environmental damage.  
 - **System Under Test (SUT):** The software being evaluated – in this case, a pump controller.  
@@ -28,9 +48,13 @@ The goal is to showcase systematic testing, automation, and compliance mindset t
 - **Malicious/Malformed Input:** Input that is incorrectly formatted or deliberately crafted to break the system.  
 - **Validation Report:** A summary of testing results, suitable for review by regulators or managers.  
 
+</details>
+
 ---
 
 ## III. System Overview  
+<details>
+<summary>Click to expand</summary>
 
 **System Under Test (SUT):** Reactor Coolant Pump Controller (C# library)  
 
@@ -52,9 +76,13 @@ The goal is to showcase systematic testing, automation, and compliance mindset t
 - If operator command malformed/unauthorized → ignore it  
 - Otherwise → pump stays ON  
 
+</details>
+
 ---
 
 ## IV. Requirements Specification  
+<details>
+<summary>Click to expand</summary>
 
 Example requirements (with IDs for traceability):  
 
@@ -68,9 +96,13 @@ Example requirements (with IDs for traceability):
 - **REQ-008:** The system shall load configuration values at startup which are immutable at runtime.  
 - **REQ-009:** The system shall contain a Tsat lookup accurate to ±2°C over the configured pressure range.  
 
+</details>
+
 ---
 
 ## V. Technical Architecture  
+<details>
+<summary>Click to expand</summary>
 
 **Languages and Tools:**  
 - **C# / .NET:** Core pump controller + unit tests (NUnit).  
@@ -83,9 +115,13 @@ Example requirements (with IDs for traceability):
   - Python harness calls CLI via subprocess.  
 - **CI/CD:** GitHub Actions for automated builds, tests, and artifact reporting.  
 
+</details>
+
 ---
 
 ## VI. Repository Layout
+<details>
+<summary>Click to expand</summary>
 
 /.github/
   workflows/
@@ -123,9 +159,13 @@ README.md
 SafetyCriticalQA.sln
 pytest.ini
 
+</details>
+
 ---
 
 ## VII. Development Steps  
+<details>
+<summary>Click to expand</summary>
 
 **Step 1: Define Requirements**  
 - Store in `requirements.yaml`.  
@@ -161,9 +201,13 @@ pytest.ini
 - GitHub Actions runs `dotnet` + `pytest`.  
 - Uploads artifacts (matrix, reports, raw test logs).  
 
+</details>
+
 ---
 
 ## VIII. Example Outputs  
+<details>
+<summary>Click to expand</summary>
 
 **Traceability Matrix:**  
 
@@ -192,9 +236,13 @@ Coverage: 100%
 
 All requirements verified. System is validated.
 
+</details>
+
 ---
 
 ## IX. Extensions & Future Work  
+<details>
+<summary>Click to expand</summary>
 
 - Expand to multiple pumps → test redundancy/failover.  
 - Add timing constraints (performance tests).  
@@ -203,7 +251,12 @@ All requirements verified. System is validated.
 - Expand cybersecurity REQ into session tokens, replay protection.  
 - Add watchdog monitoring for missed sensor updates.  
 
+</details>
+
 ## X. Quickstart
+<details>
+<summary>Click to expand</summary>
+
 ```bash
 # Build
 dotnet build SafetyCriticalQA.sln
@@ -213,6 +266,9 @@ py -m -pytest -q --junitxml=tests/python/junit_results.xml
 dotnet test tests/csharp/PumpController.Tests --logger "trx;LogFileName=dotnet_tests.trx"
 # Run Traceability Matrix & Validation Report (find in artifacts/)
 python tools/generate_traceability.py
+```
+
+</details>
 
 ## Notes
 - All operating limits are illustrative, not operational guidance.
