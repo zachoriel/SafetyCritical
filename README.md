@@ -270,13 +270,13 @@ Per-Requirement Status
 <details>
 <summary>Click to expand</summary>
 
-# UI Dashboard
+### UI Dashboard
 ```bash
 # Launch UI
 dotnet run --project src/csharp/PumpController.UI
 ```
 
-# Full-CLI
+### Full-CLI
 ```bash
 # Build
 dotnet build SafetyCriticalQA.sln
