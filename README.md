@@ -7,7 +7,7 @@
 - [IV. Requirements Specification](#iv-requirements-specification)
 - [V. Technical Architecture](#v-technical-architecture)
 - [VI. Repository Layout](#vi-repository-layout)
-- [VII. Implementation Steps](#vii-development-steps)
+- [VII. Development Steps](#vii-development-steps)
 - [VIII. Example Outputs](#viii-example-outputs)
 - [IX. Extensions & Future Work](#ix-extensions--future-work)
 - [X. Quickstart](#x-quickstart)
