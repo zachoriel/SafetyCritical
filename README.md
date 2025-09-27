@@ -7,7 +7,7 @@
 - [IV. Requirements Specification](#iv-requirements-specification)
 - [V. Technical Architecture](#v-technical-architecture)
 - [VI. Repository Layout](#vi-repository-layout)
-- [VII. Implementation Steps](#vii-implementation-steps)
+- [VII. Implementation Steps](#vii-development-steps)
 - [VIII. Example Outputs](#viii-example-outputs)
 - [IX. Extensions & Future Work](#ix-extensions--future-work)
 - [X. Quickstart](#x-quickstart)
@@ -123,6 +123,7 @@ Example requirements (with IDs for traceability):
 <details>
 <summary>Click to expand</summary>
 
+```
 /.github/
   workflows/
     ci.yml
@@ -158,6 +159,7 @@ Example requirements (with IDs for traceability):
 README.md
 SafetyCriticalQA.sln
 pytest.ini
+```
 
 </details>
 
