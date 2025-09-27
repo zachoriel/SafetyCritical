@@ -1,0 +1,20 @@
+# Each requirement has a stable ID and plain-English statement.
+requirements:
+  - id: REQ-001
+    text: The system shall shut off pump if coolant suction temperature >= Tsat(P) – Delta T subcool (default Delta T subcool = 25 degrees Celsius).
+  - id: REQ-002
+    text: The system shall shut off pump if coolant pressure drops below a configurable minimum clamp (default 70 bar).
+  - id: REQ-003
+    text: The system shall shut off pump if coolant temperature exceeds a configurable maximum clamp (default 335 degrees Celsius).
+  - id: REQ-004
+    text: The system shall shut off pump immediately if operator issues shutdown command.
+  - id: REQ-005
+    text: The system shall keep pump on during normal operation.
+  - id: REQ-006
+    text: The system shall activate an emergency shutdown flag under any shutdown condition.
+  - id: REQ-007
+    text: The system shall reject malformed or unauthorized operator commands.
+  - id: REQ-008
+    text: The system shall load configuration values at startup which are immutable at runtime.
+  - id: REQ-009
+    text: The system shall contain a Tsat lookup accurate to +- 2 degrees Celsius over the configured pressure range.
