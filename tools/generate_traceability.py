@@ -8,6 +8,7 @@ ROOT = Path(__file__).resolve().parents[1]
 TRX_SEARCH_ROOT = Path(os.getenv("TRX_SEARCH_ROOT", ROOT / "TestResults"))
 JUNIT_XML = Path(os.getenv("JUNIT_XML", ROOT / "tests/python/junit_results.xml"))
 
+
 def read_text_any(p: Path) -> str:
     for enc in ("utf-8", "utf-8-sig", "cp1252"):
         try:
@@ -15,6 +16,7 @@ def read_text_any(p: Path) -> str:
         except UnicodeDecodeError:
             continue
     return p.read_bytes().decode("utf-8", errors="replace")
+
 
 # Load requirements
 req_text = read_text_any(ROOT / "requirements/requirements.yaml")
@@ -52,10 +54,14 @@ cs_rows = json.loads(
 py_rows = []
 if JUNIT_XML.exists():
     py_rows = json.loads(
-        subprocess.check_output([PY, str(ROOT / "tools/parse_junit.py"), str(JUNIT_XML)])
+        subprocess.check_output(
+            [PY, str(ROOT / "tools/parse_junit.py"), str(JUNIT_XML)]
+        )
     )
 else:
-    print("[tracegen] WARNING: JUnit XML not found; Python tests will be absent in the matrix")
+    print(
+        "[tracegen] WARNING: JUnit XML not found; Python tests will be absent in the matrix"
+    )
 
 # Build matrix
 matrix = defaultdict(list)
@@ -63,7 +69,9 @@ matrix = defaultdict(list)
 for row in cs_rows:
     for category in row.get("categories", []):
         if category in req_ids:
-            matrix[category].append({"source": "C#", "name": row["name"], "result": row["outcome"]})
+            matrix[category].append(
+                {"source": "C#", "name": row["name"], "result": row["outcome"]}
+            )
 
 for row in py_rows:
     name = row["name"]
@@ -105,7 +113,12 @@ trace_path = out_dir / "traceability_matrix.md"
 trace_path.write_text("\n".join(lines), encoding="utf-8")
 
 total_tests = sum(len(v) for v in matrix.values())
-passes = sum(1 for v in matrix.values() for t in v if str(t["result"]).lower() in ("passed", "passed!", "success"))
+passes = sum(
+    1
+    for v in matrix.values()
+    for t in v
+    if str(t["result"]).lower() in ("passed", "passed!", "success")
+)
 coverage = int(100 * sum(1 for v in matrix.values() if v) / len(req_ids))
 
 report = f"""# Validation Report – Pump Controller
