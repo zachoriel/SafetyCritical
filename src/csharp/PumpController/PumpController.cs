@@ -16,9 +16,9 @@ public record PumpResult(
 
 public class PumpConfig
 {
-    public double DeltaTSubcool { get; init; } = 25.0; // °C
+    public double DeltaTSubcool { get; init; } = 25.0; // Â°C
     public double MinPressureBar { get; init; } = 70.0; // bar
-    public double MaxTempClampC { get; init; } = 335.0; // °C
+    public double MaxTempClampC { get; init; } = 335.0; // Â°C
     public HashSet<string> AuthorizedUsers { get; init; } = new(new[] { "operatorA", "operatorB" });
 }
 
@@ -84,13 +84,13 @@ public class PumpController
         }
         var expected = sum.ToString("X2");
 
-        return string.Equals(expected, cmd.Checksum, stringComparison.OrdinalIgnoreCase);
+        return string.Equals(expected, cmd.Checksum, StringComparison.OrdinalIgnoreCase);
     }
 }
 
 internal class TsatTable
 {
-    // Minimal pressure (bar) -> Tsat (°C) points; linear interpolation.
+    // Minimal pressure (bar) -> Tsat (Â°C) points; linear interpolation.
     // These values are illustrative for demo purposes only.
     private readonly (double p, double t)[] _pts = new (double, double)[]
     {

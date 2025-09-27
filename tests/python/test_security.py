@@ -15,4 +15,4 @@ def test_authorized_shutdown():
     assert result["PumpOn"] is False and result["Emergency"] is True and result["Reason"] == "OperatorShutdown"
 
 # Run Python tests locally
-# pytest -q --junitxml=tests/python/junit_results.xml
+# py pytest -q --junitxml=tests/python/junit_results.xml

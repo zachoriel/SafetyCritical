@@ -6,11 +6,11 @@ This repository demonstrates a safety-critical testing mindset using a simplifie
 ```bash
 dotnet build
 # C# tests -> TRX
-dotnet test tests/csharp/PumpController.Tests /logger:trx
+dotnet test tests/csharp/PumpController.Tests --logger "trx;LogFileName=results.trx"
 # Python tests -> JUnit
-pytest -q --junitxml=tests/python/junit_results.xml
+py pytest -q --junitxml=tests/python/junit_results.xml
 # Reports
-python tools/generate_traceability.py
+py python tools/generate_traceability.py
 
 Artifacts will be in ./artifacts and raw test logs under tests/...
 

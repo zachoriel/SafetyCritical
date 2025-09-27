@@ -1,7 +1,7 @@
 using NUnit.Framework;
 using PumpControllerLib;
 
-namespace PumpController.Tests;
+namespace SafetyCritical.Tests;
 
 public class ControllerSpec
 {
@@ -82,5 +82,5 @@ public class ControllerSpec
 }
 
 // Run C# tests locally:
-// dotnet test tests/csharp/PumpController.Tests /logger:trx
+// dotnet test tests/csharp/PumpController.Tests --logger "trx;LogFileName=results.trx"
 // TRX output will be in TestResults/ under the test project directory.

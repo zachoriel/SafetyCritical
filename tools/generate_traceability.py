@@ -53,7 +53,7 @@ lines = ["| Requirement | Source | Test Name | Result |", "|---|---|---|---|"]
 for req in req_ids:
     tests = matrix.get(req, [])
     if not tests:
-        lines.append(f"| {req} | – | – | – |")
+        lines.append(f"| {req} | â€“ | â€“ | â€“ |")
     else:
         for i, t in enumerate(tests):
             rid = req if i==0 else ""
@@ -64,7 +64,7 @@ for req in req_ids:
 total_tests = sum(len(v) for v in matrix.values())
 passes = sum(1 for v in matrix.values() for t in v if str(t['result']).lower() in ('passed','passed!','success'))
 report = f"""
-# Validation Report – Pump Controller
+# Validation Report â€“ Pump Controller
 
 
 Requirements: {len(req_ids)}
@@ -81,12 +81,12 @@ print("Wrote:", trace, "and validation_report.md")
 # Generate artifacts locally
 
 # 1) Run C# tests to produce TRX
-# dotnet test tests/csharp/PumpController.Tests /logger:trx
+# dotnet test tests/csharp/PumpController.Tests --logger "trx;LogFileName=results.trx"
 
 # 2) Run Python tests to produce JUnit XML
-# pytest -q --junitxml=tests/python/junit_results.xml
+# py pytest -q --junitxml=tests/python/junit_results.xml
 
 # 3) Build traceability + validation report
-# python tools/generate_traceability.py
+# py python tools/generate_traceability.py
 
 # See outputs in ./artifacts
