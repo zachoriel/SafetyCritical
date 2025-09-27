@@ -105,13 +105,12 @@ jobs:
           # Build all projects in Release (adjust path if you add a .sln)
           dotnet build --configuration Release --no-restore
 
-      - name: Run C# tests (TRX)
-        run: |
-          dotnet test ./tests/csharp/PumpController.Tests/PumpController.Tests.csproj \
-            --configuration Release \
-            --no-build \
-            --logger "trx;LogFileName=dotnet_tests.trx" \
-            --results-directory ./TestResults
+      - name: Run C# tests (TRX into ./TestResults)
+        run: >
+          dotnet test tests/csharp/PumpController.Tests
+            --configuration Release
+            --logger "trx;LogFileName=dotnet_tests.trx"
+            --results-directory TestResults
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -124,21 +123,31 @@ jobs:
           pip install -r tests/python/requirements.txt || true
           pip install pytest pyyaml junitparser
 
-      - name: Run Python tests (JUnit XML)
+      - name: Run Python tests (JUnit into repo root)
+        run: pytest -q --junitxml=pytest_results.xml
+
+      - name: List TRX & JUnitt files (diagnostic)
         run: |
-          pytest -q ./tests/python --junitxml=pytest_results.xml
+          echo "Workspace: $GITHUB_WORKSPACE"
+          echo "--- TRX files ---"
+          find "$GITHUB_WORKSPACE" -type f -name "*.trx" -print || true
+          echo "--- JUnit files ---"
+          ls -l "$GITHUB_WORKSPACE/pytest_results.xml" || true
+          ls -l "$GITHUB_WORKSPACE/tests/python/junit_results.xml" || true
 
       - name: Generate traceability matrix & validation report
-        run: |
-          python ./tools/generate_traceability.py
+        env:
+          TRX_SEARCH_ROOT: ${{ github.workspace }}/TestResults
+          JUNIT_XML: ${{ github.workspace }}/pytest_results.xml
+        run: python ./tools/generate_traceability.py
 
       - name: Upload artifacts (reports & logs)
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: reports-and-logs
           path: |
-            TestResults/dotnet_tests.trx
+            artifacts/
+            TestResults/*.trx
             pytest_results.xml
-            traceability_matrix.md
-            validation_report.*
           if-no-files-found: warn
