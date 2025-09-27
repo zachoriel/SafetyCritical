@@ -196,8 +196,8 @@ pytest.ini
 - Parse `requirements.yaml`.  
 - Parse `.trx` and JUnit XML.  
 - Produce:  
-  - `traceability_matrix.md`  
-  - `validation_report.md` (or PDF)  
+  - `traceability_matrix.log`  
+  - `validation_report.log`  
 
 **Step 7: Automate in CI/CD**  
 - GitHub Actions runs `dotnet` + `pytest`.  
@@ -211,7 +211,7 @@ pytest.ini
 <details>
 <summary>Click to expand</summary>
 
-**Traceability Matrix:**  
+**Traceability Matrix -- Generated: yyyy-MM-dd HH-mm-ss**  
 
 | Requirement | Source | Test Name                        | Result |
 |-------------|--------|----------------------------------|--------|
@@ -225,18 +225,29 @@ pytest.ini
 | REQ-008     | C#     | ConfigImmutableAtRuntime         | PASS   |
 | REQ-009     | C#     | TsatLookupAccuracy               | PASS   |
 
-**Validation Report (excerpt):**
+**Validation Report -- Generated: yyyy-MM-dd HH-mm-ss**
 
-Validation Report – Pump Controller v1.1
-Date: yyyy-MM-dd HH:mm:ss
+- **Requirements**: 9
+- **Covered**: 9 (100%)
+- **Passed**: 9 (100%
+- **Failed**: 0
+- **Skipped**: 0
+- **Unknown**: 0
 
-Requirements: 9
-Tests Executed: 18
-Pass: 18
-Fail: 0
-Coverage: 100%
+Per-Requirement Status
+| Requirement | Overall | Tests |
+| ----------- | ------- | ----- |
+| REQ-001 | Passed | C#:ShutsDownAtLowSubcoolMargin - Passed |
+| REQ-002 | Passed | C#: ShutsDownBelowMinPressureClamp - Passed<br/>Py:test_boundary_high_temp - Passed |
+| REQ-003 | Passed | C#:ShutsDownAboveMaxTempClamp — Passed<br/>Py:test_boundary_low_pressure — Passed |
+| REQ-004 | Passed | C#:OperatorShutdownImmediate_WhenAuthorizedAndValidChecksum — Passed<br/>Py:test_invalid_command_rejected — Passed |
+| REQ-005 | Passed | C#:KeepsPumpOnInNormalOperation — Passed<br/>Py:test_emergency_flag_consistency — Passed |
+| REQ-006 | Passed | C#:ShutsDownBelowMinPressureClamp — Passed<br/>C#:ShutsDownAboveMaxTempClamp — Passed<br/>C#:ShutsDownAtLowSubcoolMargin — Passed<br/>C#:OperatorShutdownImmediate_WhenAuthorizedAndValidChecksum — Passed<br/>Py:test_boundary_high_temp — Passed<br/>Py:test_boundary_low_pressure — Passed<br/>Py:test_normal_operation — Passed<br/>Py:test_invalid_command_rejected — Passed |
+| REQ-007 | Passed | C#:InvalidCommand_IsIgnored — Passed<br/>Py:test_authorized_shutdown — Passed |
+| REQ-008 | Passed | C#:ConfigProperties_AreInitOnly — Passed |
+| REQ-009 | Passed | C#:ShutsDownAtLowSubcoolMargin — Passed<br/>C#:TsatLookupAccuracy_Within2C — Passed |
 
-All requirements verified. System is validated.
+**Status**: All requirements verified. System is validated.
 
 </details>
 
