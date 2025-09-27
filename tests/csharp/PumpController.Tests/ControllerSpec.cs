@@ -1,6 +1,6 @@
 using System;
-using System.Reflection;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using NUnit.Framework;
 using PumpControllerLib;

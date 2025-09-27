@@ -2,6 +2,7 @@
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
+
 def parse_trx(trx_path: str):
     root = ET.parse(trx_path).getroot()
     NS = {"t": "http://microsoft.com/schemas/VisualStudio/TeamTest/2010"}
@@ -13,7 +14,11 @@ def parse_trx(trx_path: str):
         cats = []
         # Look exactly under TestCategory/TestCategoryItem and accept multiple attribute spellings
         for item in ut.findall(".//t:TestCategory/t:TestCategoryItem", NS):
-            cats.append(item.get("TestCategory") or item.get("name") or (item.text or "").strip())
+            cats.append(
+                item.get("TestCategory")
+                or item.get("name")
+                or (item.text or "").strip()
+            )
         id_to_cats[test_id] = [c for c in cats if c]
 
     results = []
@@ -21,9 +26,17 @@ def parse_trx(trx_path: str):
         test_id = r.get("testId")
         name = r.get("testName")
         outcome = r.get("outcome")
-        results.append({"name": name, "outcome": outcome, "categories": id_to_cats.get(test_id, [])})
+        results.append(
+            {
+                "name": name,
+                "outcome": outcome,
+                "categories": id_to_cats.get(test_id, []),
+            }
+        )
     return results
+
 
 if __name__ == "__main__":
     import sys, json
+
     print(json.dumps(parse_trx(sys.argv[1]), indent=2))
