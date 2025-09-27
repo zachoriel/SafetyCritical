@@ -55,7 +55,7 @@ public class ControllerSpec
     }
 
 
-    [Test, Category("REQ-004"), Category("REQ-006"), Category("REQ-007")]
+    [Test, Category("REQ-004"), Category("REQ-006")]
     public void OperatorShutdownImmediate_WhenAuthorizedAndValidChecksum()
     {
         var cmd = MakeCmd("operatorA", "Shutdown");

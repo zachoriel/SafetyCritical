@@ -32,8 +32,18 @@ ROOT = Path(__file__).resolve().parents[1]
 ARTIFACTS = ROOT / "artifacts"
 ARTIFACTS.mkdir(parents=True, exist_ok=True)
 
-CS_TEST_GLOB = ["tests/csharp/**/*.cs"]
-PY_TEST_GLOB = ["tests/python/**/*.py"]
+CS_TEST_GLOB = [
+    "tests/csharp/**/*.cs",
+    "tests/csharp/*.cs",
+    "tests/**/*.cs",
+    "**/test_*.cs"
+]
+PY_TEST_GLOB = [
+    "tests/python/*.py"
+    "tests/python/**/*.py",
+    "tests/**/*.py",
+    "**/test_*.py",
+]
 TRX_GLOB = ["**/*.trx"]
 JUNIT_GLOB = [
     "tests/python/**/*.xml",
