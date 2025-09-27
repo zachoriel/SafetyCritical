@@ -1,6 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-
 """
 Generate traceability artifacts:
   - artifacts/traceability_matrix.md

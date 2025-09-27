@@ -1,0 +1,97 @@
+<Window x:Class="PumpController.UI.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Safety-Critical QA Demo — Reactor UI"
+        Width="1060" Height="720"
+        WindowStartupLocation="CenterScreen">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <!-- header stats -->
+            <RowDefinition Height="*"/>
+            <!-- main area -->
+            <RowDefinition Height="160"/>
+            <!-- results/traceability -->
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="340"/>
+            <!-- right sidebar for requirements -->
+        </Grid.ColumnDefinitions>
+
+        <!-- Header: live reactor values -->
+        <Border Grid.Row="0" Grid.ColumnSpan="2" Background="#111" Padding="10" BorderBrush="#333" BorderThickness="0,0,0,1">
+            <DockPanel LastChildFill="False">
+                <StackPanel Orientation="Horizontal" Margin="0,0,16,0">
+                    <TextBlock Text="Temp (°C): " Foreground="#aaa" FontSize="16"/>
+                    <TextBlock x:Name="TempText" Text="—" Foreground="#fff" FontSize="16" FontWeight="Bold"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,0,16,0">
+                    <TextBlock Text="Pressure (bar): " Foreground="#aaa" FontSize="16"/>
+                    <TextBlock x:Name="PressureText" Text="—" Foreground="#fff" FontSize="16" FontWeight="Bold"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,0,16,0">
+                    <TextBlock Text="PumpOn: " Foreground="#aaa" FontSize="16"/>
+                    <TextBlock x:Name="PumpOnText" Text="—" Foreground="#fff" FontSize="16" FontWeight="Bold"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,0,16,0">
+                    <TextBlock Text="Emergency: " Foreground="#aaa" FontSize="16"/>
+                    <TextBlock x:Name="EmergencyText" Text="—" Foreground="#fff" FontSize="16" FontWeight="Bold"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Reason: " Foreground="#aaa" FontSize="16"/>
+                    <TextBlock x:Name="ReasonText" Text="—" Foreground="#fff" FontSize="16" FontWeight="Bold"/>
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <!-- Center: start/runner + status -->
+        <StackPanel Grid.Row="1" Grid.Column="0" Margin="16" Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center" x:Name="CenterPanel">
+            <Button x:Name="StartButton" Content="Run Demo Tests" Padding="16,10" FontSize="20" Width="280" Click="StartButton_Click"/>
+            <CheckBox x:Name="SkipDelays" Content="Instant complete tests" Margin="0,10,0,0"/>
+            <TextBlock x:Name="CurrentTestText" Text="" FontSize="22" FontWeight="SemiBold" Margin="0,20,0,0" TextWrapping="Wrap" TextAlignment="Center" Visibility="Collapsed"/>
+            <Border x:Name="OutcomeBanner" Visibility="Collapsed" Margin="0,14,0,0" CornerRadius="6" Padding="10">
+                <TextBlock x:Name="OutcomeText" FontSize="20" FontWeight="Bold" Foreground="White" TextAlignment="Center"/>
+            </Border>
+
+            <!-- Buttons visible after all tests -->
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,24,0,0" x:Name="PostRunButtons" Visibility="Collapsed" >
+                <Button Content="Re-run Demo" Padding="12,8" Margin="0,0,10,0" Click="Rerun_Click"/>
+                <Button Content="Run Automated Tests and Generate Artifacts" Padding="12,8" Margin="0,0,10,0" Click="RunRealTests_Click"/>
+                <Button Content="Open Artifacts Folder" Padding="12,8" Click="OpenArtifacts_Click"/>
+            </StackPanel>
+        </StackPanel>
+
+        <!-- Right: requirements scroll -->
+        <Border Grid.Row="1" Grid.Column="1" Margin="0,16,16,16" Padding="10" Background="#0f0f10" BorderBrush="#2a2a2a" BorderThickness="1" CornerRadius="6">
+            <DockPanel>
+                <TextBlock Text="Requirements" FontSize="18" FontWeight="Bold" Foreground="#ddd" DockPanel.Dock="Top" Margin="0,0,0,8"/>
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <TextBlock x:Name="ReqsText" TextWrapping="Wrap" Foreground="#ccc" FontSize="14"/>
+                </ScrollViewer>
+            </DockPanel>
+        </Border>
+
+        <!-- Bottom: Traceability + Validation display -->
+        <Border Grid.Row="2" Grid.ColumnSpan="2" Background="#0b0b0c" BorderBrush="#222" BorderThickness="1,1,1,0" Padding="10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <DockPanel Grid.Column="0" Margin="0,0,8,0">
+                    <TextBlock Text="Traceability Matrix (latest)" FontSize="16" FontWeight="Bold" Foreground="#ddd" DockPanel.Dock="Top"/>
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <TextBox x:Name="TraceBox" IsReadOnly="True" FontFamily="Consolas" FontSize="12" TextWrapping="NoWrap" BorderThickness="0" Background="Transparent" Foreground="#cfcfcf"/>
+                    </ScrollViewer>
+                </DockPanel>
+                <DockPanel Grid.Column="1" Margin="8,0,0,0">
+                    <TextBlock Text="Validation Report (latest)" FontSize="16" FontWeight="Bold" Foreground="#ddd" DockPanel.Dock="Top"/>
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <TextBox x:Name="ValidationBox" IsReadOnly="True" FontFamily="Consolas" FontSize="12" TextWrapping="Wrap" BorderThickness="0" Background="Transparent" Foreground="#cfcfcf"/>
+                    </ScrollViewer>
+                </DockPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>
