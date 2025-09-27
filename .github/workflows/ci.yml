@@ -2,6 +2,7 @@ name: CI
 
 on:
   push:
+    branches: [ main ]
   pull_request:
 
 permissions:
@@ -94,6 +95,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Python Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r tests/python/requirements.txt || true
+          pip install pytest pyyaml junitparser
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
@@ -102,52 +114,27 @@ jobs:
       - name: Restore & Build (C#)
         run: |
           dotnet restore
-          # Build all projects in Release (adjust path if you add a .sln)
           dotnet build --configuration Release --no-restore
 
-      - name: Run C# tests (TRX into ./TestResults)
+      - name: Run Python Tests (JUnit into artifacts/)
+        run: |
+          mkdir -p artifacts
+          pytest -q --junitxml=artifacts/junit_results.xml
+
+      - name: Run C# Tests (TRX into artifacts/)
         run: |
           dotnet test tests/csharp/PumpController.Tests \
             --configuration Release \
             --logger "trx;LogFileName=dotnet_tests.trx" \
-            --results-directory TestResults
+            --results-directory artifacts
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Install Python test deps
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r tests/python/requirements.txt || true
-          pip install pytest pyyaml junitparser
-
-      - name: Run Python tests (JUnit into repo root)
-        run: pytest -q --junitxml=pytest_results.xml
-
-      - name: List TRX & JUnitt files (diagnostic)
-        run: |
-          echo "Workspace: $GITHUB_WORKSPACE"
-          echo "--- TRX files ---"
-          find "$GITHUB_WORKSPACE" -type f -name "*.trx" -print || true
-          echo "--- JUnit files ---"
-          ls -l "$GITHUB_WORKSPACE/pytest_results.xml" || true
-          ls -l "$GITHUB_WORKSPACE/tests/python/junit_results.xml" || true
-
-      - name: Generate traceability matrix & validation report
-        env:
-          TRX_SEARCH_ROOT: ${{ github.workspace }}/TestResults
-          JUNIT_XML: ${{ github.workspace }}/pytest_results.xml
+      - name: Generate Traceability Matrix & Validation Report
         run: python ./tools/generate_traceability.py
 
-      - name: Upload artifacts (reports & logs)
+      - name: Upload Artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: reports-and-logs
-          path: |
-            artifacts/
-            TestResults/*.trx
-            pytest_results.xml
+          name: safetycritical-artifacts
+          path: artifacts/**
           if-no-files-found: warn
