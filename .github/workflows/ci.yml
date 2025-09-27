@@ -122,7 +122,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r tests/python/requirements.txt || true
-          pip install pytest
+          pip install pytest pyyaml junitparser
 
       - name: Run Python tests (JUnit XML)
         run: |
