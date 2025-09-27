@@ -1,8 +1,209 @@
 # Safety-Critical QA Demonstration Project
 
-This repository demonstrates a safety-critical testing mindset using a simplified reactor coolant pump controller implemented in C# with tests in both C# and Python.
+## I. Overview  
 
-## Quickstart
+This project demonstrates how safety-critical software can be tested and verified in ways inspired by highly-regulated industries such as nuclear power, aerospace, and medicine.  
+
+At its core, the system simulates a reactor coolant pump controller – software that decides whether to keep the pump running or to shut it down to prevent dangerous conditions. The simulation is deliberately simplistic, with emphasis on:  
+
+- Writing clear, testable requirements.  
+- Implementing the controller in C#, as many industrial systems use compiled languages for reliability.  
+- Developing automated tests in both C# (unit-level) and Python (system-level, fault injection, compliance checks).  
+- Producing traceability and compliance reports using Python, showing which requirements were tested and whether they passed.  
+- Adding a basic cybersecurity check to ensure malformed or unauthorized operator commands are rejected safely.  
+
+The goal is to showcase systematic testing, automation, and compliance mindset to safety-critical domains.  
+
+---
+
+## II. Explanation of Terminology  
+
+- **Safety-critical system:** Software where failure could cause injury, death, or major financial or environmental damage.  
+- **System Under Test (SUT):** The software being evaluated – in this case, a pump controller.  
+- **Requirements Specification:** A set of “the system shall…” statements that define intended behavior. Each has a unique ID.  
+- **Traceability Matrix:** A table linking requirements → tests → test results. Ensures complete coverage.  
+- **TRX / JUnit XML:** Standard output formats from C# test runners (TRX) and Python’s pytest (JUnit XML), used by CI/CD pipelines.  
+- **Fault Injection:** Deliberately providing invalid or extreme inputs to verify the system fails safely.  
+- **Checksum Validation:** A simple way of verifying that a command hasn’t been tampered with, representing a basic cybersecurity safeguard.  
+- **Malicious/Malformed Input:** Input that is incorrectly formatted or deliberately crafted to break the system.  
+- **Validation Report:** A summary of testing results, suitable for review by regulators or managers.  
+
+---
+
+## III. System Overview  
+
+**System Under Test (SUT):** Reactor Coolant Pump Controller (C# library)  
+
+**Inputs:**  
+- Temperature sensor (°C)  
+- Pressure sensor (bar)  
+- Operator command (with UserId, Action, and Checksum)  
+
+**Outputs:**  
+- Pump state (ON / OFF)  
+- Emergency shutdown flag (True / False)  
+- Shutdown reason (string, e.g., “HighTemp”)  
+
+**Controller Logic (simplified):**  
+- If temperature is too close to saturation → pump OFF + emergency flag ON  
+- If pressure < configured minimum clamp (e.g., 70 bar) → pump OFF + emergency flag ON  
+- If temperature > configured maximum clamp (e.g., 335°C) → pump OFF + emergency flag ON  
+- If operator issues shutdown → pump OFF immediately  
+- If operator command malformed/unauthorized → ignore it  
+- Otherwise → pump stays ON  
+
+---
+
+## IV. Requirements Specification  
+
+Example requirements (with IDs for traceability):  
+
+- **REQ-001:** The system shall shut off pump if coolant suction temperature ≥ Tsat(P) – ΔTsubcool, where ΔTsubcool is a configurable safety margin (default: 25°C).  
+- **REQ-002:** The system shall shut off pump if coolant pressure drops below a configurable minimum clamp (default: 70 bar).  
+- **REQ-003:** The system shall shut off pump if coolant temperature exceeds a configurable maximum clamp (default: 335°C).  
+- **REQ-004:** The system shall shut off pump immediately if operator issues shutdown command.  
+- **REQ-005:** The system shall keep pump on during normal operation.  
+- **REQ-006:** The system shall activate an emergency shutdown flag under any shutdown condition.  
+- **REQ-007:** The system shall reject malformed or unauthorized operator commands.  
+- **REQ-008:** The system shall load configuration values at startup which are immutable at runtime.  
+- **REQ-009:** The system shall contain a Tsat lookup accurate to ±2°C over the configured pressure range.  
+
+---
+
+## V. Technical Architecture  
+
+**Languages and Tools:**  
+- **C# / .NET:** Core pump controller + unit tests (NUnit).  
+- **Python:**  
+  - System-level tests (pytest).  
+  - Fault injection and malformed input tests.  
+  - Traceability + validation report generation.  
+- **Interop:**  
+  - C# CLI wrapper accepts JSON input, outputs JSON results.  
+  - Python harness calls CLI via subprocess.  
+- **CI/CD:** GitHub Actions for automated builds, tests, and artifact reporting.  
+
+---
+
+## VI. Repository Layout
+
+/.github/
+  workflows/
+    ci.yml
+
+/requirements/
+  requirements.yaml
+
+/src/csharp/PumpController/
+  PumpController.csproj
+  PumpController.cs
+
+/src/csharp/PumpController.CLI/
+  PumpController.CLI.csproj
+  Program.cs # JSON in -> JSON out
+
+/tests/csharp/PumpController.Tests/
+  PumpController.Tests.csproj
+  ControllerSpec.cs # NUnit, tagged with REQ IDs
+
+/tests/python/
+  test_functional.py
+  test_boundaries.py
+  test_fault_injection.py
+  test_security.py
+
+/tools/
+  generate_traceability.py
+  parse_junit.py
+
+.editorconfig
+.gitattributes
+.gitignore
+README.md
+SafetyCriticalQA.sln
+pytest.ini
+
+---
+
+## VII. Development Steps  
+
+**Step 1: Define Requirements**  
+- Store in `requirements.yaml`.  
+- Each REQ ID maps to at least one test.  
+
+**Step 2: Implement Pump Controller (C#)**  
+- Class `PumpController` with `Evaluate(temperature, pressure, command)` method.  
+- Includes simple checksum validation for operator commands.  
+- Includes Tsat table with interpolation for subcooling trip logic.  
+
+**Step 3: Build CLI Wrapper (C#)**  
+- Reads JSON input, evaluates controller, prints JSON output.  
+- Enables Python orchestration without complex bindings.  
+
+**Step 4: Write Unit Tests (C# / NUnit)**  
+- One or more tests per REQ.  
+- Use `[Category("REQ-xxx")]` to tag each test.  
+- Export results as `.trx`.  
+
+**Step 5: Write System & Fault Tests (Python / pytest)**  
+- Call C# CLI with valid/invalid inputs.  
+- Cover normal ops, boundary conditions, and malformed commands.  
+- Export results as JUnit XML.  
+
+**Step 6: Generate Traceability Matrix (Python)**  
+- Parse `requirements.yaml`.  
+- Parse `.trx` and JUnit XML.  
+- Produce:  
+  - `traceability_matrix.md`  
+  - `validation_report.md` (or PDF)  
+
+**Step 7: Automate in CI/CD**  
+- GitHub Actions runs `dotnet` + `pytest`.  
+- Uploads artifacts (matrix, reports, raw test logs).  
+
+---
+
+## VIII. Example Outputs  
+
+**Traceability Matrix:**  
+
+| Requirement | Source | Test Name                        | Result |
+|-------------|--------|----------------------------------|--------|
+| REQ-001     | C#     | ShutsDownAtLowSubcoolMargin      | PASS   |
+| REQ-002     | C#     | ShutsDownBelowMinPressureClamp   | PASS   |
+| REQ-003     | C#     | ShutsDownAboveMaxTempClamp       | PASS   |
+| REQ-004     | C#     | OperatorShutdownImmediate        | PASS   |
+| REQ-005     | Py     | test_normal_operation            | PASS   |
+| REQ-006     | Py     | test_emergency_flag_consistency  | PASS   |
+| REQ-007     | Py     | test_invalid_command_rejected    | PASS   |
+| REQ-008     | C#     | ConfigImmutableAtRuntime         | PASS   |
+| REQ-009     | C#     | TsatLookupAccuracy               | PASS   |
+
+**Validation Report (excerpt):**
+
+Validation Report – Pump Controller v1.1
+Date: yyyy-MM-dd HH:mm:ss
+
+Requirements: 9
+Tests Executed: 18
+Pass: 18
+Fail: 0
+Coverage: 100%
+
+All requirements verified. System is validated.
+
+---
+
+## IX. Extensions & Future Work  
+
+- Expand to multiple pumps → test redundancy/failover.  
+- Add timing constraints (performance tests).  
+- Add fuzz testing (random string/byte injection).  
+- Collect code coverage metrics from C#.  
+- Expand cybersecurity REQ into session tokens, replay protection.  
+- Add watchdog monitoring for missed sensor updates.  
+
+## X. Quickstart
 ```bash
 # Build
 dotnet build SafetyCriticalQA.sln
@@ -12,8 +213,6 @@ py -m -pytest -q --junitxml=tests/python/junit_results.xml
 dotnet test tests/csharp/PumpController.Tests --logger "trx;LogFileName=dotnet_tests.trx"
 # Run Traceability Matrix & Validation Report (find in artifacts/)
 python tools/generate_traceability.py
-
-Artifacts will be in ./artifacts and raw test logs under tests/...
 
 ## Notes
 - All operating limits are illustrative, not operational guidance.
