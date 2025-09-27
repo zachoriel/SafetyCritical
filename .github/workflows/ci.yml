@@ -106,10 +106,10 @@ jobs:
           dotnet build --configuration Release --no-restore
 
       - name: Run C# tests (TRX into ./TestResults)
-        run: >
-          dotnet test tests/csharp/PumpController.Tests
-            --configuration Release
-            --logger "trx;LogFileName=dotnet_tests.trx"
+        run: |
+          dotnet test tests/csharp/PumpController.Tests \
+            --configuration Release \
+            --logger "trx;LogFileName=dotnet_tests.trx" \
             --results-directory TestResults
 
       - name: Setup Python
