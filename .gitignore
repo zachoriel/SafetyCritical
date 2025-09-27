@@ -1,0 +1,38 @@
+# ---- C# / .NET ----
+bin/
+obj/
+*.exe
+*.dll
+*.pdb
+*.log
+*.user
+*.vs/
+*.suo
+*.csproj.user
+
+# ---- Python ----
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pytest_cache/
+.venv/
+env/
+venv/
+
+# ---- Test Results & Reports (CI artifacts only) ----
+*.trx
+*.xml
+traceability_matrix.md
+validation_report.md
+validation_report.pdf
+
+# ---- IDE / Editor ----
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ---- OS / Misc ----
+.DS_Store
+Thumbs.db

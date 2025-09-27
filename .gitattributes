@@ -1,0 +1,55 @@
+# --- Core: normalize line endings ---
+* text=auto
+# Prefer LF in the repo (editors on Windows/macOS will convert on checkout)
+* eol=lf
+
+# Windows-native files that should keep CRLF
+*.sln eol=crlf
+*.bat eol=crlf
+*.cmd eol=crlf
+
+# --- Source files: ensure treated as text (consistent diffs) ---
+*.cs      text diff=csharp
+*.csproj  text
+*.sln     text
+*.props   text
+*.targets text
+*.xml     text
+*.json    text
+*.yaml    text
+*.yml     text
+*.py      text
+*.md      text
+*.txt     text
+*.ini     text
+.gitignore text
+.gitattributes text
+
+# --- Binaries: never attempt to diff/merge ---
+*.exe     binary
+*.dll     binary
+*.pdb     binary
+*.nupkg   binary
+*.png     binary
+*.jpg     binary
+*.jpeg    binary
+*.gif     binary
+*.ico     binary
+*.pdf     binary
+*.zip     binary
+
+# --- CI artifacts & generated evidence (shouldn't be in Git anyway) ---
+# If they ever sneak in, treat them as generated so they don't affect language stats.
+# Also disable diffs to avoid noisy PRs.
+*.trx                    -diff linguist-generated
+junit*.xml               -diff linguist-generated
+test-results*.xml        -diff linguist-generated
+traceability_matrix.md   -diff linguist-generated
+validation_report.md     -diff linguist-generated
+validation_report.pdf    -diff linguist-generated
+
+# --- Packaging & exports ---
+# If you ever create release tarballs via `git archive`, exclude common clutter.
+.github/ export-ignore
+.vscode/ export-ignore
+.idea/   export-ignore
