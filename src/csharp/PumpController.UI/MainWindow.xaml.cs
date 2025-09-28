@@ -91,9 +91,7 @@ REQ-009 — Tsat lookup accurate to ±2°C over configured range";
             ReasonText.Text = result.Reason;
 
             // Pass/fail
-            bool pass = result.PumpOn == c.ExpPumpOn &&
-                        result.Emergency == c.ExpEmergency &&
-                        string.Equals(result.Reason, c.ExpReason, StringComparison.Ordinal);
+            bool pass = result.PumpOn == c.ExpPumpOn && result.Emergency == c.ExpEmergency && string.Equals(result.Reason, c.ExpReason, StringComparison.Ordinal);
 
             // Update per-test banner (used during manual mode)
             OutcomeText.Text = pass ? "PASSED" : "FAILED";
@@ -201,47 +199,6 @@ REQ-009 — Tsat lookup accurate to ±2°C over configured range";
                 RunNextButton.Content = "Run Test";
             }
         }
-
-        //private async Task RunDemoSequence()
-        //{
-        //    OutcomeBanner.Visibility = Visibility.Collapsed;
-
-        //    foreach (var c in _cases)
-        //    {
-        //        // Show which test + requirements
-        //        CurrentTestText.Text = $"{c.Name}\n({string.Join(", ", c.ReqIds)})";
-        //        OutcomeBanner.Visibility = Visibility.Collapsed;
-
-        //        // Artificial delay before running (unless skip)
-        //        if (AutocompleteTests.IsChecked == true) { /* no wait */ }
-        //        else { await Task.Delay(1500); }
-
-        //        // Evaluate
-        //        var result = _controller.Evaluate(c.TempC, c.PressureBar, c.Command);
-
-        //        // Update live header
-        //        TempText.Text = c.TempC.ToString("0.#");
-        //        PressureText.Text = c.PressureBar.ToString("0.#");
-        //        PumpOnText.Text = result.PumpOn ? "True" : "False";
-        //        EmergencyText.Text = result.Emergency ? "True" : "False";
-        //        ReasonText.Text = result.Reason;
-
-        //        // Decide pass/fail
-        //        bool pass = result.PumpOn == c.ExpPumpOn &&
-        //                    result.Emergency == c.ExpEmergency &&
-        //                    string.Equals(result.Reason, c.ExpReason, StringComparison.Ordinal);
-
-        //        OutcomeText.Text = pass ? "PASSED" : "FAILED";
-        //        OutcomeBanner.Background = pass ? new SolidColorBrush(Color.FromRgb(0x17, 0x6F, 0x2C))
-        //                                        : new SolidColorBrush(Color.FromRgb(0xB0, 0x1E, 0x1E));
-        //        OutcomeBanner.Visibility = Visibility.Visible;
-
-        //        if (AutocompleteTests.IsChecked == true) { /* no wait */ }
-        //        else { await Task.Delay(1500); }
-        //    }
-
-        //    CurrentTestText.Text = "All demo tests complete.";
-        //}
 
         private void Rerun_Click(object sender, RoutedEventArgs e)
         {
