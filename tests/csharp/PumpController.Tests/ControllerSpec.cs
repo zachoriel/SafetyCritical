@@ -47,7 +47,7 @@ public class ControllerSpec
     public void ShutsDownAtLowSubcoolMargin()
     {
         var c = new PumpController(new PumpConfig { DeltaTSubcool = 25 });
-        // Choose pressure so Tsat = 285C; set temp such that temp >= Tsat - 25
+        // Choose pressure so Tsat = 285C; set temp such that temp >= Tsat - DeltaTSubcool
         var r = c.Evaluate(temperatureC: 265, pressureBar: 70, command: null);
         Assert.That(r.PumpOn, Is.False);
         Assert.That(r.Emergency, Is.True);
