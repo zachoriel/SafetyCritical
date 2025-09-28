@@ -2,7 +2,7 @@
 
 ![C#](https://img.shields.io/badge/c%23-%23239120.svg?style=for-the-badge&logo=csharp&logoColor=white)
 ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
-![Last Commit](https://img.shields.io/github/last-commit/zachoriel/We-Have-C-At-Home)
+![Last Commit](https://img.shields.io/github/last-commit/zachoriel/SafetyCritical)
 
 <img width="1041" height="709" alt="image" src="https://github.com/user-attachments/assets/33e487bf-4ea7-4cef-91a0-2842ac720a33" />
 
