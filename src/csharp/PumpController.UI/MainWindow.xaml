@@ -45,22 +45,66 @@
             </DockPanel>
         </Border>
 
-        <!-- Center: start/runner + status -->
-        <StackPanel Grid.Row="1" Grid.Column="0" Margin="16" Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center" x:Name="CenterPanel">
-            <Button x:Name="StartButton" Content="Run Demo Tests" Padding="16,10" FontSize="20" Width="280" Click="StartButton_Click"/>
-            <CheckBox x:Name="SkipDelays" Content="Instant complete tests" Margin="0,10,0,0"/>
-            <TextBlock x:Name="CurrentTestText" Text="" FontSize="22" FontWeight="SemiBold" Margin="0,20,0,0" TextWrapping="Wrap" TextAlignment="Center" Visibility="Collapsed"/>
-            <Border x:Name="OutcomeBanner" Visibility="Collapsed" Margin="0,14,0,0" CornerRadius="6" Padding="10">
-                <TextBlock x:Name="OutcomeText" FontSize="20" FontWeight="Bold" Foreground="White" TextAlignment="Center"/>
-            </Border>
+        <!-- Center: test runner (manual) -->
+        <StackPanel Grid.Row="1" Grid.Column="0" Margin="16" Orientation="Vertical"
+            HorizontalAlignment="Center" VerticalAlignment="Center" x:Name="CenterPanel">
 
-            <!-- Buttons visible after all tests -->
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,24,0,0" x:Name="PostRunButtons" Visibility="Collapsed" >
-                <Button Content="Re-run Demo" Padding="12,8" Margin="0,0,10,0" Click="Rerun_Click"/>
-                <Button Content="Run Automated Tests and Generate Artifacts" Padding="12,8" Margin="0,0,10,0" Click="RunRealTests_Click"/>
-                <Button Content="Open Artifacts Folder" Padding="12,8" Click="OpenArtifacts_Click"/>
+            <!-- Begin button -->
+            <Button x:Name="StartButton" Content="Begin Demo" Padding="16,10" FontSize="20" Width="240"
+          Click="StartButton_Click"/>
+
+            <CheckBox x:Name="AutocompleteTests" Content="Instantly complete test suite"
+          Margin="0,8,0,0" IsChecked="False"/>
+
+            <!-- Per-test card -->
+            <StackPanel x:Name="TestCard" Visibility="Collapsed" Margin="0,10,0,0" Width="640">
+                <TextBlock x:Name="CurrentTestText" FontSize="22" FontWeight="SemiBold"
+               TextWrapping="Wrap" TextAlignment="Center" Margin="0,0,0,10"/>
+                <Border x:Name="OutcomeBanner" Visibility="Collapsed" CornerRadius="6" Padding="10" Margin="0,0,0,10">
+                    <TextBlock x:Name="OutcomeText" FontSize="20" FontWeight="Bold"
+                 Foreground="White" TextAlignment="Center"/>
+                </Border>
+
+                <Button x:Name="RunNextButton" Content="Run Test" Padding="12,8" Width="160"
+            HorizontalAlignment="Center" Click="RunNextButton_Click"/>
             </StackPanel>
         </StackPanel>
+
+        <!-- Center: final results rollup (appears after last test) -->
+        <Border Grid.Row="1" Grid.Column="0" Margin="16" Padding="10" Background="#0f0f10"
+        BorderBrush="#2a2a2a" BorderThickness="1" CornerRadius="6"
+        x:Name="ResultsRollup" Visibility="Collapsed">
+            <DockPanel>
+                <!-- Buttons at the bottom -->
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,8,0,0"
+                x:Name="PostRunButtons" Visibility="Collapsed" DockPanel.Dock="Bottom">
+                    <Button Content="Re-run Demo" Padding="12,8" Margin="0,0,10,0" Click="Rerun_Click"/>
+                    <Button Content="Generate Artifacts (takes a minute - updates bottom panels)" Padding="12,8" Margin="0,0,10,0"
+              Click="RunRealTests_Click"/>
+                    <Button Content="Open Artifacts Folder" Padding="12,8" Click="OpenArtifacts_Click"/>
+                </StackPanel>
+
+                <TextBlock Text="Demo Results" FontSize="18" FontWeight="Bold" Foreground="#ddd"
+               DockPanel.Dock="Top" Margin="0,0,0,8"/>
+
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <ItemsControl x:Name="ResultsList">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border CornerRadius="6" Padding="10" Margin="0,0,0,8"
+                    Background="{Binding BannerBrush}">
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Name}" FontSize="16" FontWeight="Bold" Foreground="White"/>
+                                        <TextBlock Text="{Binding ReqText}" FontSize="12" Foreground="#f2f2f2" Margin="0,2,0,6"/>
+                                        <TextBlock Text="{Binding OutcomeText}" FontSize="14" FontWeight="SemiBold" Foreground="White"/>
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </DockPanel>
+        </Border>
 
         <!-- Right: requirements scroll -->
         <Border Grid.Row="1" Grid.Column="1" Margin="0,16,16,16" Padding="10" Background="#0f0f10" BorderBrush="#2a2a2a" BorderThickness="1" CornerRadius="6">

@@ -14,6 +14,18 @@ namespace PumpController.UI
 {
     public partial class MainWindow : Window
     {
+        record DisplayOutcome(string Name, string ReqText, bool Pass)
+        {
+            public string OutcomeText => Pass ? "PASSED" : "FAILED";
+            public System.Windows.Media.Brush BannerBrush => Pass ? new System.Windows.Media.SolidColorBrush(
+                System.Windows.Media.Color.FromRgb(0x17, 0x6F, 0x2C)) : new System.Windows.Media.SolidColorBrush(
+                    System.Windows.Media.Color.FromRgb(0xB0, 0x1E, 0x1E));
+        }
+
+        private int _currentIndex = -1;
+        private bool _testHasRun = false;
+        private readonly List<DisplayOutcome> _history = new();
+
         record DemoCase(
             string Name,
             double TempC,
@@ -66,67 +78,186 @@ REQ-009 — Tsat lookup accurate to ±2°C over configured range";
             return new OperatorCommand(userId, action, hex);
         }
 
-        private async void StartButton_Click(object sender, RoutedEventArgs e)
+        private bool RunTestAndUpdateUI(int index)
         {
-            StartButton.Visibility = Visibility.Collapsed;
-            CurrentTestText.Visibility = Visibility.Visible;
+            var c = _cases[index];
+            var result = _controller.Evaluate(c.TempC, c.PressureBar, c.Command);
 
-            await RunDemoSequence();
-            PostRunButtons.Visibility = Visibility.Visible;
+            // Update header readouts
+            TempText.Text = c.TempC.ToString("0.#");
+            PressureText.Text = c.PressureBar.ToString("0.#");
+            PumpOnText.Text = result.PumpOn ? "True" : "False";
+            EmergencyText.Text = result.Emergency ? "True" : "False";
+            ReasonText.Text = result.Reason;
 
-            // Try loading artifacts in case they were generated previously
-            LoadLatestArtifacts();
+            // Pass/fail
+            bool pass = result.PumpOn == c.ExpPumpOn &&
+                        result.Emergency == c.ExpEmergency &&
+                        string.Equals(result.Reason, c.ExpReason, StringComparison.Ordinal);
+
+            // Update per-test banner (used during manual mode)
+            OutcomeText.Text = pass ? "PASSED" : "FAILED";
+            OutcomeBanner.Background = pass ? new SolidColorBrush(Color.FromRgb(0x17, 0x6F, 0x2C)) : new SolidColorBrush(Color.FromRgb(0xB0, 0x1E, 0x1E));
+            OutcomeBanner.Visibility = Visibility.Visible;
+
+            // Record for final rollup
+            _history.Add(new DisplayOutcome(c.Name, $"Requirements: {string.Join(", ", c.ReqIds)}", pass));
+
+            return pass;
         }
 
-        private async Task RunDemoSequence()
+        private void StartButton_Click(object sender, RoutedEventArgs e)
         {
+            PostRunButtons.Visibility = Visibility.Collapsed;
+            ResultsRollup.Visibility = Visibility.Collapsed;
+            ResultsList.ItemsSource = null;
+            _history.Clear();
             OutcomeBanner.Visibility = Visibility.Collapsed;
 
-            foreach (var c in _cases)
+            TempText.Text = PressureText.Text = PumpOnText.Text = EmergencyText.Text = ReasonText.Text = "—";
+
+            if (AutocompleteTests.IsChecked == true)
             {
-                // Show which test + requirements
+                AutocompleteTestRuns();
+            }
+            else
+            {
+                // Manual mode: show first test card, but do NOT run it yet
+                StartButton.Visibility = Visibility.Collapsed;
+                _currentIndex = 0;
+                _testHasRun = false;
+
+                var c = _cases[_currentIndex];
                 CurrentTestText.Text = $"{c.Name}\n({string.Join(", ", c.ReqIds)})";
                 OutcomeBanner.Visibility = Visibility.Collapsed;
+                TestCard.Visibility = Visibility.Visible;
+                RunNextButton.Content = "Run Test";
+            }
+        }
 
-                // Artificial delay before running (unless skip)
-                if (SkipDelays.IsChecked == true) { /* no wait */ }
-                else { await Task.Delay(1500); }
+        private void AutocompleteTestRuns()
+        {
+            // Auto-run full suite quickly
+            StartButton.Visibility = Visibility.Collapsed;
+            TestCard.Visibility = Visibility.Collapsed;
 
-                // Evaluate
-                var result = _controller.Evaluate(c.TempC, c.PressureBar, c.Command);
-
-                // Update live header
-                TempText.Text = c.TempC.ToString("0.#");
-                PressureText.Text = c.PressureBar.ToString("0.#");
-                PumpOnText.Text = result.PumpOn ? "True" : "False";
-                EmergencyText.Text = result.Emergency ? "True" : "False";
-                ReasonText.Text = result.Reason;
-
-                // Decide pass/fail
-                bool pass = result.PumpOn == c.ExpPumpOn &&
-                            result.Emergency == c.ExpEmergency &&
-                            string.Equals(result.Reason, c.ExpReason, StringComparison.Ordinal);
-
-                OutcomeText.Text = pass ? "PASSED" : "FAILED";
-                OutcomeBanner.Background = pass ? new SolidColorBrush(Color.FromRgb(0x17, 0x6F, 0x2C))
-                                                : new SolidColorBrush(Color.FromRgb(0xB0, 0x1E, 0x1E));
-                OutcomeBanner.Visibility = Visibility.Visible;
-
-                if (SkipDelays.IsChecked == true) { /* no wait */ }
-                else { await Task.Delay(1500); }
+            for (int i = 0; i < _cases.Count; i++)
+            {
+                // Update the current test label so users see progress as it runs
+                var c = _cases[i];
+                CurrentTestText.Text = $"{c.Name}\n({string.Join(", ", c.ReqIds)})";
+                RunTestAndUpdateUI(i);
             }
 
+            // Show rollup + post-run buttons
+            ResultsList.ItemsSource = _history;
+            ResultsRollup.Visibility = Visibility.Visible;
+            PostRunButtons.Visibility = Visibility.Visible;
             CurrentTestText.Text = "All demo tests complete.";
+            _currentIndex = _cases.Count; // mark as finished
+            _testHasRun = true;
         }
+
+        private void RunNextButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (_currentIndex < 0 || _currentIndex >= _cases.Count) return;
+
+            if (AutocompleteTests.IsChecked == true)
+            {
+                AutocompleteTestRuns();
+                return;
+            }
+
+            if (!_testHasRun)
+            {
+                // Run the current test
+                RunTestAndUpdateUI(_currentIndex);
+
+                _testHasRun = true;
+                RunNextButton.Content = "Next Test";
+            }
+            else
+            {
+                // Advance to next test (or finish)
+                _currentIndex++;
+                _testHasRun = false;
+
+                if (_currentIndex >= _cases.Count)
+                {
+                    // Done — show final rollup + post-run buttons
+                    TestCard.Visibility = Visibility.Collapsed;
+                    ResultsList.ItemsSource = _history;
+                    ResultsRollup.Visibility = Visibility.Visible;
+                    PostRunButtons.Visibility = Visibility.Visible;
+                    CurrentTestText.Text = "All demo tests complete.";
+                    return;
+                }
+
+                // Prepare next test card (do not run yet)
+                var c = _cases[_currentIndex];
+                CurrentTestText.Text = $"{c.Name}\n({string.Join(", ", c.ReqIds)})";
+                OutcomeBanner.Visibility = Visibility.Collapsed;
+                TempText.Text = PressureText.Text = PumpOnText.Text = EmergencyText.Text = ReasonText.Text = "—";
+                RunNextButton.Content = "Run Test";
+            }
+        }
+
+        //private async Task RunDemoSequence()
+        //{
+        //    OutcomeBanner.Visibility = Visibility.Collapsed;
+
+        //    foreach (var c in _cases)
+        //    {
+        //        // Show which test + requirements
+        //        CurrentTestText.Text = $"{c.Name}\n({string.Join(", ", c.ReqIds)})";
+        //        OutcomeBanner.Visibility = Visibility.Collapsed;
+
+        //        // Artificial delay before running (unless skip)
+        //        if (AutocompleteTests.IsChecked == true) { /* no wait */ }
+        //        else { await Task.Delay(1500); }
+
+        //        // Evaluate
+        //        var result = _controller.Evaluate(c.TempC, c.PressureBar, c.Command);
+
+        //        // Update live header
+        //        TempText.Text = c.TempC.ToString("0.#");
+        //        PressureText.Text = c.PressureBar.ToString("0.#");
+        //        PumpOnText.Text = result.PumpOn ? "True" : "False";
+        //        EmergencyText.Text = result.Emergency ? "True" : "False";
+        //        ReasonText.Text = result.Reason;
+
+        //        // Decide pass/fail
+        //        bool pass = result.PumpOn == c.ExpPumpOn &&
+        //                    result.Emergency == c.ExpEmergency &&
+        //                    string.Equals(result.Reason, c.ExpReason, StringComparison.Ordinal);
+
+        //        OutcomeText.Text = pass ? "PASSED" : "FAILED";
+        //        OutcomeBanner.Background = pass ? new SolidColorBrush(Color.FromRgb(0x17, 0x6F, 0x2C))
+        //                                        : new SolidColorBrush(Color.FromRgb(0xB0, 0x1E, 0x1E));
+        //        OutcomeBanner.Visibility = Visibility.Visible;
+
+        //        if (AutocompleteTests.IsChecked == true) { /* no wait */ }
+        //        else { await Task.Delay(1500); }
+        //    }
+
+        //    CurrentTestText.Text = "All demo tests complete.";
+        //}
 
         private void Rerun_Click(object sender, RoutedEventArgs e)
         {
             // Reset UI for another demo run
             PostRunButtons.Visibility = Visibility.Collapsed;
             OutcomeBanner.Visibility = Visibility.Collapsed;
-            CurrentTestText.Text = "";
+            ResultsRollup.Visibility = Visibility.Collapsed;
+            ResultsList.ItemsSource = null;
+            _history.Clear();
+
             TempText.Text = PressureText.Text = PumpOnText.Text = EmergencyText.Text = ReasonText.Text = "—";
             StartButton.Visibility = Visibility.Visible;
+            TestCard.Visibility = Visibility.Collapsed;
+
+            _currentIndex = -1;
+            _testHasRun = false;
         }
 
         private async void RunRealTests_Click(object sender, RoutedEventArgs e)
@@ -305,9 +436,7 @@ REQ-009 — Tsat lookup accurate to ±2°C over configured range";
             foreach (var c in cases)
             {
                 var r = controller.Evaluate(c.TempC, c.PressureBar, c.Command);
-                var pass = r.PumpOn == c.ExpPumpOn
-                           && r.Emergency == c.ExpEmergency
-                           && string.Equals(r.Reason, c.ExpReason, StringComparison.Ordinal);
+                var pass = r.PumpOn == c.ExpPumpOn && r.Emergency == c.ExpEmergency && string.Equals(r.Reason, c.ExpReason, StringComparison.Ordinal);
                 results.Add((c, r, pass));
             }
 
@@ -370,9 +499,7 @@ REQ-009 — Tsat lookup accurate to ±2°C over configured range";
                 {
                     var msg = $"Expected PumpOn={t.c.ExpPumpOn},Emergency={t.c.ExpEmergency},Reason={t.c.ExpReason} " +
                               $"but got PumpOn={t.r.PumpOn},Emergency={t.r.Emergency},Reason={t.r.Reason}";
-                    tc.Add(new XElement("failure",
-                        new XAttribute("message", msg),
-                        new XCData(msg)));
+                    tc.Add(new XElement("failure", new XAttribute("message", msg), new XCData(msg)));
                 }
                 suite.Add(tc);
             }
