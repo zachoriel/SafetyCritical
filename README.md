@@ -2,15 +2,15 @@
 
 ## Table of Contents
 - [I. Overview](#i-overview)
-- [II. Explanation of Terminology](#ii-explanation-of-terminology)
-- [III. System Overview](#iii-system-overview)
-- [IV. Requirements Specification](#iv-requirements-specification)
-- [V. Technical Architecture](#v-technical-architecture)
-- [VI. Repository Layout](#vi-repository-layout)
-- [VII. Development Steps](#vii-development-steps)
-- [VIII. Example Outputs](#viii-example-outputs)
-- [IX. Extensions & Future Work](#ix-extensions--future-work)
-- [X. Quickstart](#x-quickstart)
+- [II. Quickstart](#ii-quickstart)
+- [III. Explanation of Terminology](#iii-explanation-of-terminology)
+- [IV. System Overview](#iv-system-overview)
+- [V. Requirements Specification](#v-requirements-specification)
+- [VI. Technical Architecture](#vi-technical-architecture)
+- [VII. Repository Layout](#vii-repository-layout)
+- [VIII. Development Steps](#viii-development-steps)
+- [IX. Example Outputs](#ix-example-outputs)
+- [X. Extensions & Future Work](#x-extensions--future-work)
 
 ---
 
@@ -34,13 +34,59 @@ The goal is to showcase systematic testing, automation, and compliance mindset t
 
 ---
 
-## II. Explanation of Terminology
+## II. Quickstart
+<details>
+<summary>Click to expand</summary>
+
+A graphical UI dashboard is available to step through tests manually or auto-run the full suite, with live status updates and a final rollup of results.
+
+Alternatively, if you have Python 3.10+, pytest, and .NET8.0+, you can run a few CLI commands.
+
+### Option A: UI Dashboard
+
+Simply run the packaged UI executable (`PumpController.UI.exe`) - no Python or .NET install required.
+
+(Or open a command window at the project root and run `dotnet run --project src/csharp/PumpController.UI`.)
+
+<img width="1041" height="711" alt="image" src="https://github.com/user-attachments/assets/e93931fd-8ebe-4511-b686-4bdd64d8bf9d" />
+
+**Key:**
+
+- Header: shows live Temp/Pressure/PumpOn/Emergency/Reason text.
+- Manual mode: click "Run Test" -> "Next Test" -> view scrollable results list.
+- Auto mode: check the "Instantly complete test suite" box and click "Begin Demo" (or "Run Test" if you're part-way through). Runs the whole suite instantly and displays scrollable results.
+- End: scrollable rollup of all tests + buttons to rerun, generate artifacts, or view artifact file location.
+- Right-side panel: a list of all requirements for the software - can be used to compare individual test results with the header panel display.
+- Bottom panels: displays the latest traceability matrix and validation report - created via the Generate Artifacts button at the end of testing.
+
+### Option B: CLI (for developers)
+
+Run the following:
+
+```bash
+# Build
+dotnet build SafetyCriticalQA.sln
+# Run Python Tests (find in tests/python/junit_results.xml)
+py -m pytest -q --junitxml=tests/python/junit_results.xml
+# Run C# Tests (find in tests/csharp/PumpController.Tests/TestResults)
+dotnet test tests/csharp/PumpController.Tests --logger "trx;LogFileName=dotnet_tests.trx"
+# Run Traceability Matrix & Validation Report (find in artifacts/)
+python tools/generate_traceability.py
+```
+
+</details>
+
+---
+
+## III. Explanation of Terminology
 <details>
 <summary>Click to expand</summary>
 
 - **Safety-critical system:** Software where failure could cause injury, death, or major financial or environmental damage.  
 - **System Under Test (SUT):** The software being evaluated – in this case, a pump controller.  
-- **Requirements Specification:** A set of “the system shall…” statements that define intended behavior. Each has a unique ID.  
+- **Requirements Specification:** A set of “the system shall…” statements that define intended behavior. Each has a unique ID.
+- **Tsat (Saturation Temperature):** The temperature at which a liquid will start to boil at a specific pressure. For water, Tsat increases with pressure. Safety systems use Tsat to determine whether the coolant is at risk of boiling.
+- **ΔTsubcool ("Delta T subcool" - Subcooling Margin):** The temperature difference between the coolant's saturation temperature (Tsat) at a given pressure and the actual measured coolant temperature. It indicates how far below boiling the coolant is. A larger ΔTsubcool means more safety margin before boiling begins.
 - **Traceability Matrix:** A table linking requirements → tests → test results. Ensures complete coverage.  
 - **TRX / JUnit XML:** Standard output formats from C# test runners (TRX) and Python’s pytest (JUnit XML), used by CI/CD pipelines.  
 - **Fault Injection:** Deliberately providing invalid or extreme inputs to verify the system fails safely.  
@@ -52,7 +98,7 @@ The goal is to showcase systematic testing, automation, and compliance mindset t
 
 ---
 
-## III. System Overview  
+## IV. System Overview  
 <details>
 <summary>Click to expand</summary>
 
@@ -80,7 +126,7 @@ The goal is to showcase systematic testing, automation, and compliance mindset t
 
 ---
 
-## IV. Requirements Specification  
+## V. Requirements Specification  
 <details>
 <summary>Click to expand</summary>
 
@@ -100,7 +146,7 @@ Example requirements (with IDs for traceability):
 
 ---
 
-## V. Technical Architecture  
+## VI. Technical Architecture  
 <details>
 <summary>Click to expand</summary>
 
@@ -119,7 +165,7 @@ Example requirements (with IDs for traceability):
 
 ---
 
-## VI. Repository Layout
+## VII. Repository Layout
 <details>
 <summary>Click to expand</summary>
 
@@ -165,7 +211,7 @@ pytest.ini
 
 ---
 
-## VII. Development Steps  
+## VIII. Development Steps  
 <details>
 <summary>Click to expand</summary>
 
@@ -201,15 +247,30 @@ pytest.ini
 
 **Step 7: Automate in CI/CD**  
 - GitHub Actions runs `dotnet` + `pytest`.  
-- Uploads artifacts (matrix, reports, raw test logs).  
+- Uploads artifacts (matrix, reports, raw test logs).
+
+**Step 8: Add UI Dashboard**
+- Manual mode for individual test observation.
+- Auto mode for quick full-suite completion.
+- Requirements panel.
+- Artifacts panel.
+- Generate artifacts sequence.
 
 </details>
 
 ---
 
-## VIII. Example Outputs  
+## IX. Example Outputs  
 <details>
 <summary>Click to expand</summary>
+
+**UI Dashboard -- Individual Test Run**
+
+<img width="1043" height="706" alt="image" src="https://github.com/user-attachments/assets/d5bf68a8-d156-499e-b383-084a7e6308ba" />
+
+**UI Dashboard -- Completed Test Suite**
+
+<img width="1044" height="709" alt="image" src="https://github.com/user-attachments/assets/9a5f850f-14dd-42a0-a2f3-492fbdb6216c" />
 
 **Traceability Matrix -- Generated: yyyy-MM-dd HH-mm-ss**  
 
@@ -229,7 +290,7 @@ pytest.ini
 
 - **Requirements**: 9
 - **Covered**: 9 (100%)
-- **Passed**: 9 (100%
+- **Passed**: 9 (100%)
 - **Failed**: 0
 - **Skipped**: 0
 - **Unknown**: 0
@@ -253,7 +314,7 @@ Per-Requirement Status
 
 ---
 
-## IX. Extensions & Future Work  
+## X. Extensions & Future Work  
 <details>
 <summary>Click to expand</summary>
 
@@ -266,29 +327,7 @@ Per-Requirement Status
 
 </details>
 
-## X. Quickstart
-<details>
-<summary>Click to expand</summary>
-
-### UI Dashboard
-```bash
-# Launch UI
-dotnet run --project src/csharp/PumpController.UI
-```
-
-### Full-CLI
-```bash
-# Build
-dotnet build SafetyCriticalQA.sln
-# Run Python Tests (find in tests/python/junit_results.xml)
-py -m -pytest -q --junitxml=tests/python/junit_results.xml
-# Run C# Tests (find in tests/csharp/PumpController.Tests/TestResults)
-dotnet test tests/csharp/PumpController.Tests --logger "trx;LogFileName=dotnet_tests.trx"
-# Run Traceability Matrix & Validation Report (find in artifacts/)
-python tools/generate_traceability.py
-```
-
-</details>
+---
 
 ## Notes
 - All operating limits are illustrative, not operational guidance.
