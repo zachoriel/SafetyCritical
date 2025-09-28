@@ -52,12 +52,12 @@ Simply run the packaged UI executable (`PumpController.UI.exe`) - no Python or .
 
 **Key:**
 
-- Header: shows live Temp/Pressure/PumpOn/Emergency/Reason text.
-- Manual mode: click "Run Test" -> "Next Test" -> view scrollable results list.
-- Auto mode: check the "Instantly complete test suite" box and click "Begin Demo" (or "Run Test" if you're part-way through). Runs the whole suite instantly and displays scrollable results.
-- End: scrollable rollup of all tests + buttons to rerun, generate artifacts, or view artifact file location.
-- Right-side panel: a list of all requirements for the software - can be used to compare individual test results with the header panel display.
-- Bottom panels: displays the latest traceability matrix and validation report - created via the Generate Artifacts button at the end of testing.
+- **Header:** shows live Temp/Pressure/PumpOn/Emergency/Reason text.
+- **Manual mode:** click "Run Test" -> "Next Test" -> view scrollable results list.
+- **Auto mode:** check the "Instantly complete test suite" box and click "Begin Demo" (or "Run Test" if you're part-way through). Runs the whole suite instantly and displays scrollable results.
+- **End:** scrollable rollup of all tests + buttons to rerun, generate artifacts, or view artifact file location.
+- **Right-side panel:** a list of all requirements for the software - can be used to compare individual test results with the header panel display.
+- **Bottom panels:** displays the latest traceability matrix and validation report - created via the Generate Artifacts button at the end of testing.
 
 ### Option B: CLI (for developers)
 
@@ -92,7 +92,19 @@ python tools/generate_traceability.py
 - **Fault Injection:** Deliberately providing invalid or extreme inputs to verify the system fails safely.  
 - **Checksum Validation:** A simple way of verifying that a command hasn’t been tampered with, representing a basic cybersecurity safeguard.  
 - **Malicious/Malformed Input:** Input that is incorrectly formatted or deliberately crafted to break the system.  
-- **Validation Report:** A summary of testing results, suitable for review by regulators or managers.  
+- **Validation Report:** A summary of testing results, suitable for review by regulators or managers.
+
+**Reference Tsat Table:**
+| Pressure (bar) | Tsat (°C) |
+| -------------- | --------- |
+| 1 | 100 |
+| 10 | 180 |
+| 20 | 212 |
+| 40 | 252 |
+| 70 | 285 |
+| 100 | 311 |
+
+*The above table values were used for this project, but should not be taken as true-to-life for any given reactor.
 
 </details>
 
