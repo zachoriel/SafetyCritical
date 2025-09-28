@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Xml.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows;
@@ -136,25 +137,35 @@ REQ-009 — Tsat lookup accurate to ±2°C over configured range";
             {
                 string repoRoot = FindRepoRoot() ?? throw new InvalidOperationException("Could not locate repo root.");
 
+                // Try Python first (dev environment)
                 // pytest via Python module (so it can run without a pytest.exe on PATH)
                 // Try common Windows python executables in order: repo .venv, python, py
                 string? pythonExe = FindPython(repoRoot);
-                if (pythonExe is null)
-                    throw new Exception(
-                        "Could not find Python. Install Python 3 and ensure it's on PATH, " +
-                        "or create a .venv at the repo root.\n\nQuick fix:\n  winget install Python.Python.3\n  python -m pip install pytest");
+                if (pythonExe != null)
+                {
+                    // Produce junit_results.xml in repo root
+                    await RunProcess(pythonExe, "-m pytest -q --junitxml=\"tests/python\"/junit_results.xml", repoRoot);
 
-                // Produce junit_results.xml in repo root
-                await RunProcess(pythonExe, "-m pytest -q --junitxml=\"tests/python\"/junit_results.xml", repoRoot);
+                    // dotnet test
+                    await RunProcess("dotnet", "test tests/csharp/PumpController.Tests --logger trx;LogFileName=dotnet_tests.trx", repoRoot);
 
-                // dotnet test
-                await RunProcess("dotnet", "test tests/csharp/PumpController.Tests --logger trx;LogFileName=dotnet_tests.trx", repoRoot);
+                    // Generate traceability & validation logs
+                    await RunProcess(pythonExe, "tools/generate_traceability.py", repoRoot);
 
-                // Generate traceability & validation logs
-                await RunProcess(pythonExe, "tools/generate_traceability.py", repoRoot);
+                    CurrentTestText.Text = "Automated tests & artifacts updated.";
+                }
+                else
+                {
+                    // No Python - run the C# functional pass & generate artifacts locally
+                    // Re-map existing _cases into NonDevArtifacts.Case
+                    var nonDevCases = _cases.Select(c => new NonDevArtifacts.Case(c.Name, c.TempC, c.PressureBar, c.Command, c.ExpPumpOn, c.ExpEmergency,
+                        c.ExpReason, c.ReqIds)).ToList();
 
-                LoadLatestArtifacts(); // refresh lower panes
-                CurrentTestText.Text = "Automated tests & artifacts updated.";
+                    var (dir, junit) = NonDevArtifacts.GenerateAll(nonDevCases, repoRoot);
+                    CurrentTestText.Text = $"Artifacts generated (no Python): {Path.GetFileName(dir)}";
+                }
+
+                LoadLatestArtifacts(); // Refresh bottom panes
             }
             catch (Exception ex)
             {
@@ -269,6 +280,107 @@ REQ-009 — Tsat lookup accurate to ±2°C over configured range";
 
             // Open in Explorer
             Process.Start(new ProcessStartInfo { FileName = artifacts, UseShellExecute = true });
+        }
+    }
+
+    static class NonDevArtifacts
+    {
+        public sealed record Case(
+            string Name,
+            double TempC,
+            double PressureBar,
+            OperatorCommand? Command,
+            bool ExpPumpOn,
+            bool ExpEmergency,
+            string ExpReason,
+            string[] ReqIds);
+
+        public static (string artifactsDir, string junitPath) GenerateAll(
+            IEnumerable<Case> cases,
+            string repoRoot)
+        {
+            // Evaluate all cases using the real controller
+            var controller = new PumpControllerLib.PumpController();
+            var results = new List<(Case c, PumpResult r, bool pass)>();
+            foreach (var c in cases)
+            {
+                var r = controller.Evaluate(c.TempC, c.PressureBar, c.Command);
+                var pass = r.PumpOn == c.ExpPumpOn
+                           && r.Emergency == c.ExpEmergency
+                           && string.Equals(r.Reason, c.ExpReason, StringComparison.Ordinal);
+                results.Add((c, r, pass));
+            }
+
+            // Ensure artifacts folder
+            string artifactsRoot = Path.Combine(repoRoot, "artifacts");
+            Directory.CreateDirectory(artifactsRoot);
+            string stamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+            string artifactsDir = Path.Combine(artifactsRoot, stamp);
+            Directory.CreateDirectory(artifactsDir);
+
+            // Write traceability_matrix.log
+            var traceLines = new List<string> {
+                $"Traceability Matrix — {DateTime.Now}",
+                new string('=', 64),
+                ""
+            };
+            foreach (var t in results)
+            {
+                traceLines.Add($"Test: {t.c.Name}");
+                traceLines.Add($"  Requirements: {string.Join(", ", t.c.ReqIds)}");
+                traceLines.Add($"  Expected: PumpOn={t.c.ExpPumpOn} Emergency={t.c.ExpEmergency} Reason={t.c.ExpReason}");
+                traceLines.Add($"  Actual:   PumpOn={t.r.PumpOn} Emergency={t.r.Emergency} Reason={t.r.Reason}");
+                traceLines.Add($"  Result:   {(t.pass ? "PASS" : "FAIL")}");
+                traceLines.Add("");
+            }
+            File.WriteAllLines(Path.Combine(artifactsDir, "traceability_matrix.log"), traceLines);
+
+            // Write validation_report.log
+            int passed = results.Count(x => x.pass);
+            int total = results.Count;
+            var validation = new List<string> {
+                $"Validation Report — {DateTime.Now}",
+                new string('=', 64),
+                $"Total: {total}  Passed: {passed}  Failed: {total - passed}",
+                (total == passed) ? "STATUS: VALIDATED (all tests passed)" : "STATUS: NOT VALIDATED (some tests failed)",
+                ""
+            };
+            foreach (var t in results)
+            {
+                validation.Add($"{(t.pass ? "[PASS]" : "[FAIL]")} {t.c.Name} — [{string.Join(", ", t.c.ReqIds)}]");
+            }
+            File.WriteAllLines(Path.Combine(artifactsDir, "validation_report.log"), validation);
+
+            // Write junit_results.xml
+            string junitPath = Path.Combine($"{repoRoot}/tests/python/", "junit_results.xml");
+            var suite = new XElement("testsuite",
+                new XAttribute("name", "NonDevFunctional"),
+                new XAttribute("tests", total),
+                new XAttribute("failures", total - passed),
+                new XAttribute("time", "0.0"));
+
+            foreach (var t in results)
+            {
+                var tc = new XElement("testcase",
+                    new XAttribute("classname", "NonDev"),
+                    new XAttribute("name", t.c.Name),
+                    new XAttribute("time", "0.0"));
+
+                if (!t.pass)
+                {
+                    var msg = $"Expected PumpOn={t.c.ExpPumpOn},Emergency={t.c.ExpEmergency},Reason={t.c.ExpReason} " +
+                              $"but got PumpOn={t.r.PumpOn},Emergency={t.r.Emergency},Reason={t.r.Reason}";
+                    tc.Add(new XElement("failure",
+                        new XAttribute("message", msg),
+                        new XCData(msg)));
+                }
+                suite.Add(tc);
+            }
+
+            var doc = new XDocument(new XElement("testsuites", suite));
+            doc.Save(junitPath);
+
+            return (artifactsDir, junitPath);
         }
     }
 }
