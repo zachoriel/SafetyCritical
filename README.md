@@ -1,5 +1,7 @@
 # Safety-Critical QA Demonstration Project
 
+<img width="1041" height="709" alt="image" src="https://github.com/user-attachments/assets/33e487bf-4ea7-4cef-91a0-2842ac720a33" />
+
 ## Table of Contents
 - [I. Overview](#i-overview)
 - [II. Quickstart](#ii-quickstart)
