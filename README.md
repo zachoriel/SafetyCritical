@@ -16,7 +16,8 @@
 - [VII. Repository Layout](#vii-repository-layout)
 - [VIII. Development Steps](#viii-development-steps)
 - [IX. Example Outputs](#ix-example-outputs)
-- [X. Extensions & Future Work](#x-extensions--future-work)
+- [X. Devs - Adjusting Test Values](#x-devs-adjusting-test-values)
+- [XI. Extensions & Future Work](#xi-extensions--future-work)
 
 ---
 
@@ -353,7 +354,44 @@ Per-Requirement Status
 
 ---
 
-## X. Extensions & Future Work  
+## X. Devs - Adjusting Test Values
+
+<details>
+<summary>Click to expand</summary>
+
+**Adjusting values for TRX output**
+
+- Open tests/csharp/PumpController.Tests/ControllerSpec.cs
+- Choose a test function
+- Modify `temperatureC`, `pressureBar`, or `command` values
+- Run `dotnet test tests/csharp/PumpController.Tests --logger "trx;LogFileName=dotnet_tests.trx"`
+- Open tests/csharp/PumpController.Tests/TestResults/dotnet_tests.trx to see results
+
+<img width="927" height="265" alt="image" src="https://github.com/user-attachments/assets/608e5332-3fc5-42cc-82ff-ccae3d2b399c" />
+
+<img width="915" height="140" alt="image" src="https://github.com/user-attachments/assets/dc4250bf-9d2c-4a43-932e-ab94127298f9" />
+
+**Adjusting values for UI output**
+
+- Open src/csharp/PumpController.ui/MainWindow.xaml.cs
+- Locate the list of demo cases in the MainWindow class (search for `_cases = new List<DemoCase>`)
+- Adjust passed-in temp, pressure, and cmd values as desired
+- Run `dotnet run --project src/csharp/PumpController.UI`
+- See new test output
+
+See the below example where the "Normal operation" test has been altered to send a temperature value of 2500 instead of 250, resulting in a failed test output and updated logs.
+
+<img width="1785" height="291" alt="image" src="https://github.com/user-attachments/assets/cb73f6f0-1d3c-454d-9f09-233aac098471" />
+
+<img width="1043" height="550" alt="image" src="https://github.com/user-attachments/assets/b576b7cf-22a7-4865-9eae-9d7b47d91774" />
+
+<img width="1044" height="712" alt="image" src="https://github.com/user-attachments/assets/1238df39-05ce-4c6a-99dd-587e618bd3f8" />
+
+</details>
+
+---
+
+## XI. Extensions & Future Work  
 <details>
 <summary>Click to expand</summary>
 
