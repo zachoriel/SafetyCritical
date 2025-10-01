@@ -336,18 +336,25 @@ REQ-009 — Tsat lookup accurate to ±2°C over configured range";
 
             // Write junit_results.xml
             string junitPath = Path.Combine(artifactsDir, "junit_results.xml");
+
+            var tests = results.Count;
+            var passes = results.Count(x => x.pass);
+            var failures = results.Count(x => !x.pass);
+
             var suite = new XElement("testsuite",
                 new XAttribute("name", "PortableFunctional"),
-                new XAttribute("tests", results.Count),
-                new XAttribute("failures", results.Count(x => !x.pass)),
-                new XAttribute("time", "0.0"));
+                new XAttribute("tests", tests),
+                new XAttribute("passes", passes),
+                new XAttribute("failures", failures),
+                new XAttribute("timestamp", DateTime.UtcNow.ToString("O")),
+                new XAttribute("hostname", Environment.MachineName)
+            );
 
             foreach (var t in results)
             {
                 var tc = new XElement("testcase",
                     new XAttribute("classname", "Portable"),
-                    new XAttribute("name", t.c.Name),
-                    new XAttribute("time", "0.0"));
+                    new XAttribute("name", t.c.Name));
 
                 if (!t.pass)
                 {
