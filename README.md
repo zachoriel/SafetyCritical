@@ -1,14 +1,15 @@
 # Safety-Critical QA Demonstration Project
 
 ![C#](https://img.shields.io/badge/c%23-%23239120.svg?style=for-the-badge&logo=csharp&logoColor=white)
-![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
+![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)\
+![Windows](https://img.shields.io/badge/Windows-0078D6?style=for-the-badge&logo=windows&logoColor=white)\
 ![Last Commit](https://img.shields.io/github/last-commit/zachoriel/SafetyCritical)
 
 <img width="1040" height="711" alt="image" src="https://github.com/user-attachments/assets/2f42154e-35b3-4d8f-b326-278459390848" />
 
 ## Table of Contents
 - [I. Overview](#i-overview)
-- [II. Quickstart](#ii-quickstart)
+- [II. Quickstart (requires windows)](#ii-quickstart-requires-windows)
 - [III. Explanation of Terminology](#iii-explanation-of-terminology)
 - [IV. System Overview](#iv-system-overview)
 - [V. Requirements Specification](#v-requirements-specification)
@@ -41,7 +42,7 @@ The goal is to showcase systematic testing, automation, and compliance mindset t
 
 ---
 
-## II. Quickstart
+## II. Quickstart (requires Windows)
 <details>
 <summary>Click to expand</summary>
 
@@ -177,7 +178,9 @@ Example requirements (with IDs for traceability):
   - Traceability + validation report generation.  
 - **Interop:**  
   - C# CLI wrapper accepts JSON input, outputs JSON results.  
-  - Python harness calls CLI via subprocess.  
+  - Python harness calls CLI via subprocess.
+- **WPF:**
+  - Test harness GUI
 - **CI/CD:** GitHub Actions for automated builds, tests, and artifact reporting.  
 
 </details>
@@ -303,9 +306,13 @@ pytest.ini
 
 <img width="1040" height="712" alt="image" src="https://github.com/user-attachments/assets/2e36b81c-8cae-4b16-8d28-5f45057a66d0" />
 
+<br></br>
+
 **UI Dashboard -- Completed Test Suite**
 
 <img width="1043" height="711" alt="image" src="https://github.com/user-attachments/assets/564995c4-6f8c-45e9-ad90-3f7f0c26d61f" />
+
+<br></br>
 
 **Traceability Matrix (Devs - CLI)**
 
@@ -323,6 +330,7 @@ Traceability Matrix -- Generated: yyyy-MM-dd HH-mm-ss
 | REQ-008     | C#     | ConfigImmutableAtRuntime         | PASS   |
 | REQ-009     | C#     | TsatLookupAccuracy               | PASS   |
 
+<br></br>
 
 **Validation Report -- Generated: yyyy-MM-dd HH-mm-ss**
 
@@ -347,6 +355,8 @@ Per-Requirement Status
 | REQ-009 | Passed | C#:ShutsDownAtLowSubcoolMargin — Passed<br/>C#:TsatLookupAccuracy_Within2C — Passed |
 
 **Status**: All requirements verified. System is validated.
+
+<br></br>
 
 *Note: the CLI version runs each requirement individually, whereas the UI dashboard condenses outputs where possible (i.e., REQ-006 is implicitly checked each time a pump shutdown occurs).
 
