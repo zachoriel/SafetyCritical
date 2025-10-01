@@ -4,7 +4,7 @@
 ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
 ![Last Commit](https://img.shields.io/github/last-commit/zachoriel/SafetyCritical)
 
-<img width="1041" height="709" alt="image" src="https://github.com/user-attachments/assets/33e487bf-4ea7-4cef-91a0-2842ac720a33" />
+<img width="1040" height="711" alt="image" src="https://github.com/user-attachments/assets/2f42154e-35b3-4d8f-b326-278459390848" />
 
 ## Table of Contents
 - [I. Overview](#i-overview)
@@ -46,15 +46,15 @@ The goal is to showcase systematic testing, automation, and compliance mindset t
 
 A graphical UI dashboard is available to step through tests manually or auto-run the full suite, with live status updates and a final rollup of results.
 
-Alternatively, if you have Python 3.10+, pytest, and .NET8.0+, you can run a few CLI commands.
+Alternatively, if you have Python 3.10+, pytest, and .NET8.0+, you can run a few CLI commands to see more technical outputs.
 
 ### Option A: UI Dashboard
 
 Simply run the packaged UI executable (`PumpController.UI.exe`) - no Python or .NET install required.
 
-(Or open a command window at the project root and run `dotnet run --project src/csharp/PumpController.UI`.)
+(Or (devs): open a command window at the project root and run `dotnet run --project src/csharp/PumpController.UI`.)
 
-<img width="1041" height="711" alt="image" src="https://github.com/user-attachments/assets/e93931fd-8ebe-4511-b686-4bdd64d8bf9d" />
+<img width="1040" height="709" alt="image" src="https://github.com/user-attachments/assets/d28574de-0b98-469a-b54a-c8cd158e796a" />
 
 **Key:**
 
@@ -201,7 +201,16 @@ Example requirements (with IDs for traceability):
 
 /src/csharp/PumpController.CLI/
   PumpController.CLI.csproj
-  Program.cs # JSON in -> JSON out
+  Program.cs
+
+/src/csharp/PumpController.UI/
+  App.xaml
+  App.xaml.cs
+  AssemblyInfo.cs
+  MainWindow.xaml
+  MainWindow.xaml.cs
+  PumpController.UI.csproj
+  PumpController.UI.slnx
 
 /tests/csharp/PumpController.Tests/
   PumpController.Tests.csproj
@@ -220,6 +229,8 @@ Example requirements (with IDs for traceability):
 .editorconfig
 .gitattributes
 .gitignore
+LICENSE
+pytest.ini
 README.md
 SafetyCriticalQA.sln
 pytest.ini
@@ -274,6 +285,11 @@ pytest.ini
 - Artifacts panel.
 - Generate artifacts sequence.
 
+**Step 9: Polish**
+- UI tweaks
+- Debug mode for altering test values
+- Misc. updates
+
 </details>
 
 ---
@@ -284,13 +300,15 @@ pytest.ini
 
 **UI Dashboard -- Individual Test Run**
 
-<img width="1043" height="706" alt="image" src="https://github.com/user-attachments/assets/d5bf68a8-d156-499e-b383-084a7e6308ba" />
+<img width="1040" height="712" alt="image" src="https://github.com/user-attachments/assets/2e36b81c-8cae-4b16-8d28-5f45057a66d0" />
 
 **UI Dashboard -- Completed Test Suite**
 
-<img width="1044" height="709" alt="image" src="https://github.com/user-attachments/assets/9a5f850f-14dd-42a0-a2f3-492fbdb6216c" />
+<img width="1043" height="711" alt="image" src="https://github.com/user-attachments/assets/564995c4-6f8c-45e9-ad90-3f7f0c26d61f" />
 
-**Traceability Matrix -- Generated: yyyy-MM-dd HH-mm-ss**  
+**Traceability Matrix (Devs - CLI)**
+
+Traceability Matrix -- Generated: yyyy-MM-dd HH-mm-ss
 
 | Requirement | Source | Test Name                        | Result |
 |-------------|--------|----------------------------------|--------|
@@ -303,6 +321,7 @@ pytest.ini
 | REQ-007     | Py     | test_invalid_command_rejected    | PASS   |
 | REQ-008     | C#     | ConfigImmutableAtRuntime         | PASS   |
 | REQ-009     | C#     | TsatLookupAccuracy               | PASS   |
+
 
 **Validation Report -- Generated: yyyy-MM-dd HH-mm-ss**
 
@@ -327,6 +346,8 @@ Per-Requirement Status
 | REQ-009 | Passed | C#:ShutsDownAtLowSubcoolMargin — Passed<br/>C#:TsatLookupAccuracy_Within2C — Passed |
 
 **Status**: All requirements verified. System is validated.
+
+*Note: the CLI version runs each requirement individually, whereas the UI dashboard condenses outputs where possible (i.e., REQ-006 is implicitly checked each time a pump shutdown occurs).
 
 </details>
 
