@@ -72,7 +72,8 @@ REQ-009 — Tsat lookup accurate to ±2°C over configured range";
                 new("High temp clamps OFF", 340, 90, null, false, true, "HighTempClamp", new[]{"REQ-003","REQ-006"}),
                 new("Authorized operator shutdown", 250, 90, MakeCmd("operatorA","Shutdown"), false, true, "OperatorShutdown", new[]{"REQ-004","REQ-006"}),
                 new("Normal operation", 250, 90, null, true, false, "Normal", new[]{"REQ-005"}),
-                new("Invalid command ignored", 250, 90, new OperatorCommand("intruder","Shutdown","00"), true, false, "Normal", new[]{"REQ-007"})
+                new("Invalid command ignored", 250, 90, new OperatorCommand("intruder","Shutdown","00"), true, false, "Normal", new[]{"REQ-007"}),
+                new("Config Properties Immutable", 250, 90, null, true, false, "Normal", new[]{"REQ-008" })
             };
 
             LoadLatestArtifacts();
