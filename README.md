@@ -50,6 +50,12 @@ A graphical UI dashboard is available to step through tests manually or auto-run
 
 Alternatively, if you have Python 3.10+, pytest, and .NET8.0+, you can run a few CLI commands to see more technical outputs.
 
+### Setup
+
+Find the latest release in the Releases tab of this repo and follow the instructions.
+
+<img width="371" height="676" alt="image" src="https://github.com/user-attachments/assets/d14935f5-22b6-4553-b3ef-95f3ab06f7e5" />
+
 ### Option A: UI Dashboard
 
 Simply run the packaged UI executable (`PumpController.UI.exe`) - no Python or .NET install required.
