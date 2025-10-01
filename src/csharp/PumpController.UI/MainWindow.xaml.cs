@@ -63,7 +63,7 @@ REQ-007 — Reject malformed/unauthorized operator commands
 REQ-008 — Load config at startup; values immutable at runtime
 REQ-009 — Tsat lookup accurate to ±2°C over configured range";
 
-            // Build demo sequence mirroring unit/system tests. These are the expected outputs.
+            // Build demo sequence mirroring unit/system tests.
             // (Values taken directly from tests in tests/csharp/PumpController.TestsControllerSpec.cs.)
             _cases = new List<DemoCase>
             {
