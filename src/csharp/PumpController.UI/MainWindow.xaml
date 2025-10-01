@@ -79,7 +79,7 @@
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,8,0,0"
                 x:Name="PostRunButtons" Visibility="Collapsed" DockPanel.Dock="Bottom">
                     <Button Content="Re-run Demo" Padding="12,8" Margin="0,0,10,0" Click="Rerun_Click"/>
-                    <Button Content="Generate Artifacts (takes a minute - updates bottom panels)" Padding="12,8" Margin="0,0,10,0"
+                    <Button Content="Generate Artifacts (updates bottom panels)" Padding="12,8" Margin="0,0,10,0"
               Click="RunRealTests_Click"/>
                     <Button Content="Open Artifacts Folder" Padding="12,8" Click="OpenArtifacts_Click"/>
                 </StackPanel>
