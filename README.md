@@ -2,8 +2,7 @@
 
 ![C#](https://img.shields.io/badge/c%23-%23239120.svg?style=for-the-badge&logo=csharp&logoColor=white)
 ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)\
-![Windows](https://img.shields.io/badge/Windows-0078D6?style=for-the-badge&logo=windows&logoColor=white)\
-![Last Commit](https://img.shields.io/github/last-commit/zachoriel/SafetyCritical)
+![Windows](https://img.shields.io/badge/Windows-0078D6?style=for-the-badge&logo=windows&logoColor=white)
 
 <img width="1040" height="711" alt="image" src="https://github.com/user-attachments/assets/2f42154e-35b3-4d8f-b326-278459390848" />
 
