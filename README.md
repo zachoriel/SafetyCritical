@@ -51,9 +51,7 @@ Alternatively, if you have Python 3.10+, pytest, and .NET8.0+, you can run a few
 
 ### Setup
 
-Find the latest release in the Releases tab of this repo and follow the instructions.
-
-<img width="371" height="676" alt="image" src="https://github.com/user-attachments/assets/d14935f5-22b6-4553-b3ef-95f3ab06f7e5" />
+Head over to the [Releases page](https://github.com/zachoriel/SafetyCritical/releases) of this repo and follow the instructions.
 
 ### Option A: UI Dashboard
 
